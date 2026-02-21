@@ -1,0 +1,8 @@
+﻿.env
+client_secret.json
+*.db
+*.sqlite
+__pycache__/
+instance/
+.venv/
+.vscode/

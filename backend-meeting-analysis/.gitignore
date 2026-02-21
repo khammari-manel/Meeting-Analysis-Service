@@ -1,0 +1,6 @@
+﻿.env
+client_secret.json
+*.db
+*.sqlite
+instance/
+__pycache__/

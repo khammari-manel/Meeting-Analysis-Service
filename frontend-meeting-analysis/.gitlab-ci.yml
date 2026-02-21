@@ -1,0 +1,40 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_TAG: registry.gitlab.com/$CI_PROJECT_PATH/frontend-meeting-analysis:$CI_COMMIT_SHORT_SHA
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+
+deploy:
+  stage: deploy
+  image: mcr.microsoft.com/azure-cli
+  script:
+    - az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"
+    - az container delete --name "$AZURE_CONTAINER_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --yes || true
+    - az container create
+        --resource-group "$AZURE_RESOURCE_GROUP"
+        --name "$AZURE_CONTAINER_NAME"
+        --image "$IMAGE_TAG"
+        --registry-login-server registry.gitlab.com
+        --registry-username "$CI_REGISTRY_USER"
+        --registry-password "$CI_REGISTRY_PASSWORD"
+        --cpu 1 --memory 1.5
+        --restart-policy Always
+        --location "$AZURE_CONTAINER_REGION"
+        --dns-name-label "$AZURE_DNS_NAME_LABEL"
+        --ports 80
+        --os-type Linux
+        --ip-address Public
+  only:
+    - main

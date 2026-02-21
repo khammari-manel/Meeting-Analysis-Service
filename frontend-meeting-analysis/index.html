@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Meeting Parser - Multi-User</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #1a202c;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 32px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    /* Login Section */
+    .login-container {
+      padding: 48px 32px;
+      text-align: center;
+    }
+    
+    .login-container h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #2d3748;
+    }
+    
+    .login-container p {
+      color: #718096;
+      margin-bottom: 32px;
+    }
+    
+    .google-btn {
+      background: white;
+      color: #2d3748;
+      border: 2px solid #e2e8f0;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s;
+    }
+    
+    .google-btn:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    /* User Info Bar */
+    .user-info {
+      background: #f7fafc;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .user-info span {
+      font-size: 14px;
+      color: #4a5568;
+    }
+    
+    .logout-btn {
+      background: transparent;
+      color: #e53e3e;
+      border: 1px solid #e53e3e;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: #e53e3e;
+      color: white;
+    }
+    
+    /* Main Content */
+    .content {
+      padding: 32px;
+    }
+    
+    .upload-section {
+      background: #f7fafc;
+      border: 2px dashed #cbd5e0;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 24px;
+      transition: all 0.3s;
+    }
+    
+    .upload-section:hover {
+      border-color: #667eea;
+      background: #edf2f7;
+    }
+    
+    .upload-section label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #4a5568;
+      margin-bottom: 16px;
+    }
+    
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    input[type="file"]:hover {
+      border-color: #667eea;
+    }
+    
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      width: 100%;
+      margin-top: 16px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Calendar Buttons Container */
+    .calendar-buttons-container {
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+      border-radius: 12px;
+      border: 2px solid #667eea30;
+    }
+    
+    .calendar-buttons-container h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .calendar-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .calendar-btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .calendar-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .calendar-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .btn-personal {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-invite {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+    
+    .hidden { 
+      display: none; 
+    }
+    
+    /* Response Section */
+    .response-section {
+      margin-top: 32px;
+    }
+    
+    .response-section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+    
+    pre {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      max-height: 400px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    /* Spinner */
+    #spinner {
+      display: none;
+      text-align: center;
+      padding: 32px;
+    }
+    
+    .spinner {
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    #spinner p {
+      color: #718096;
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Login Section -->
+    <div id="loginSection">
+      <div class="header">
+        <h1>📅 Meeting Parser</h1>
+        <p>Intelligente Meeting-Analyse für Ihr Team</p>
+      </div>
+      <div class="login-container">
+        <h2>Willkommen zurück</h2>
+        <p>Melden Sie sich mit Ihrem Google-Konto an</p>
+        <button class="google-btn" onclick="handleGoogleSignIn()">
+          <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" fill-rule="evenodd">
+              <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z"></path>
+              <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"></path>
+              <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z"></path>
+              <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z"></path>
+            </g>
+          </svg>
+          Mit Google anmelden
+        </button>
+      </div>
+    </div>
+
+    <!-- App Section -->
+    <div id="appSection" class="hidden">
+      <div class="header">
+        <h1>📅 Meeting Parser</h1>
+        <p>Intelligente Meeting-Analyse für Ihr Team</p>
+      </div>
+      
+      <div class="user-info">
+        <span>👤 <strong id="userName"></strong></span>
+        <button class="logout-btn" onclick="handleLogout()">Abmelden</button>
+      </div>
+
+      <div class="content">
+        <div class="upload-section">
+          <label for="file">📄 Meeting-Protokoll hochladen</label>
+          <input type="file" id="file" accept=".pdf,.docx,.txt" />
+        </div>
+
+        <button class="btn-primary" onclick="submitForm()">Analysieren & Parsen</button>
+
+        <!-- NEW: Two Calendar Buttons -->
+        <div id="calendarButtonsContainer" class="calendar-buttons-container hidden">
+          <h3>📅 Events zum Kalender hinzufügen</h3>
+          <div class="calendar-buttons">
+            <button class="calendar-btn btn-personal" onclick="addToMyCalendar()">
+              📝 Nur zu meinem Kalender
+            </button>
+            <button class="calendar-btn btn-invite" onclick="addWithInvitations()">
+              📧 Mit Einladungen senden
+            </button>
+          </div>
+        </div>
+
+        <div id="spinner">
+          <div class="spinner"></div>
+          <p>Wird verarbeitet...</p>
+        </div>
+
+        <div class="response-section">
+          <h2>Ergebnis</h2>
+          <pre id="response">Noch keine Analyse durchgeführt</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8080';
+    let resultsData = null;
+    let currentUserEmail = null;
+
+    // ==================== AUTH FUNCTIONS ====================
+
+    async function checkAuth() {
+      try {
+        const response = await fetch(`${API_URL}/me`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          currentUserEmail = user.email;
+          showApp(user);
+        } else {
+          showLogin();
+        }
+      } catch (err) {
+        showLogin();
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      try {
+        const response = await fetch(`${API_URL}/auth/google`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        
+        const data = await response.json();
+        
+        const width = 500, height = 600;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        
+        const popup = window.open(
+          data.auth_url,
+          'Google Sign In',
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+        
+        if (!popup) {
+          alert('Popup wurde blockiert! Bitte erlauben Sie Popups für diese Seite.');
+          return;
+        }
+        
+        window.addEventListener('message', async (event) => {
+          if (event.data === 'login_success') {
+            if (popup && !popup.closed) popup.close();
+            
+            const userResponse = await fetch(`${API_URL}/me`, {
+              credentials: 'include'
+            });
+            const user = await userResponse.json();
+            currentUserEmail = user.email;
+            showApp(user);
+          }
+        });
+        
+      } catch (err) {
+        alert('Anmeldefehler: ' + err.message);
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        location.reload();
+      } catch (err) {
+        alert('Abmeldefehler: ' + err.message);
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('appSection').classList.add('hidden');
+    }
+
+    function showApp(user) {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+      document.getElementById('userName').textContent = user.name || user.email;
+    }
+
+    // ==================== FILE UPLOAD & PARSE ====================
+
+    async function submitForm() {
+      const fileInput = document.getElementById('file');
+      const responseEl = document.getElementById('response');
+      const spinner = document.getElementById('spinner');
+
+      if (!fileInput.files.length) {
+        responseEl.textContent = '⚠️ Bitte eine Datei hochladen.';
+        return;
+      }
+
+      responseEl.textContent = '';
+      spinner.style.display = 'block';
+      hideCalendarButtons();
+
+      try {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        const response = await fetch(`${API_URL}/parse`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert('Sitzung abgelaufen. Bitte melden Sie sich erneut an.');
+            location.reload();
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        resultsData = data;
+        responseEl.textContent = JSON.stringify(data, null, 2);
+        
+        // Show calendar buttons
+        showCalendarButtons();
+        
+        fileInput.value = '';
+        
+        console.log('✅ Parse successful:', data);
+        
+      } catch (err) {
+        responseEl.textContent = '❌ Fehler: ' + err.message;
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
+
+    // ==================== CALENDAR FUNCTIONS ====================
+
+    // Function 1: Add to personal calendar only (no invitations)
+    async function addToMyCalendar() {
+      if (!resultsData) {
+        alert('❌ Keine Events zum Hinzufügen');
+        return;
+      }
+      
+      console.log('📅 Füge Events zu persönlichem Kalender hinzu...');
+      
+      try {
+        const response = await fetch(`${API_URL}/calendar/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            events: resultsData,
+            sendInvitations: false  // KEY: No invitations
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log('✅ Kalender-Antwort:', data);
+          
+          let message = `✅ Erfolgreich ${data.created_count} Event(s) erstellt!`;
+          
+          if (data.personal_tasks > 0) {
+            message += `\n\n📝 ${data.personal_tasks} persönliche Aufgabe(n) hinzugefügt.`;
+          }
+          
+          message += '\n\n✓ Keine Einladungen wurden versendet.';
+          
+          alert(message);
+        } else {
+          console.error('❌ Fehler:', data);
+          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+        }
+      } catch (err) {
+        console.error('❌ Anfrage fehlgeschlagen:', err);
+        alert('❌ Fehler beim Hinzufügen: ' + err.message);
+      }
+    }
+
+    // Function 2: Add with invitations (delegates to others)
+    async function addWithInvitations() {
+      if (!resultsData) {
+        alert('❌ Keine Events zum Hinzufügen');
+        return;
+      }
+      
+      console.log('📧 Füge Events mit Einladungen hinzu...');
+      
+      try {
+        // First, get preview of what will be sent
+        const previewResponse = await fetch(`${API_URL}/calendar/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ events: resultsData })
+        });
+        
+        const preview = await previewResponse.json();
+        
+        console.log('📊 Vorschau:', preview);
+        
+        // Build confirmation message
+        let confirmMessage = `Sie sind dabei, ${preview.total_events} Kalender-Event(s) zu erstellen:\n\n`;
+        
+        if (preview.tasks_for_self > 0) {
+          confirmMessage += `📝 ${preview.tasks_for_self} Aufgabe(n) für Sie selbst\n`;
+        }
+        
+        if (preview.tasks_for_others > 0) {
+          confirmMessage += `📧 ${preview.tasks_for_others} Aufgabe(n) für andere Personen\n\n`;
+          confirmMessage += `E-Mail-Einladungen werden VON IHNEN gesendet:\n`;
+          confirmMessage += `"${preview.organizer_name || preview.organizer} hat Sie eingeladen..."\n\n`;
+          
+          // Show who will receive invitations
+          if (preview.details && preview.details.others) {
+            confirmMessage += `Empfänger:\n`;
+            preview.details.others.forEach(task => {
+              confirmMessage += `  • ${task.assignee} (${task.email})\n`;
+            });
+          }
+        }
+        
+        if (preview.tasks_without_email > 0) {
+          confirmMessage += `\n⚠️ ${preview.tasks_without_email} Aufgabe(n) ohne E-Mail-Adresse\n`;
+          confirmMessage += `(Diese werden als persönliche Erinnerungen hinzugefügt)\n`;
+        }
+        
+        confirmMessage += '\n\nFortfahren?';
+        
+        // Show confirmation dialog
+        if (!confirm(confirmMessage)) {
+          console.log('❌ Benutzer hat abgebrochen');
+          return;
+        }
+        
+        // User confirmed - proceed with creation
+        const response = await fetch(`${API_URL}/calendar/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            events: resultsData,
+            sendInvitations: true  // KEY: Send invitations
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log('✅ Kalender-Antwort:', data);
+          
+          let message = `✅ Erfolgreich ${data.created_count} Event(s) erstellt!`;
+          
+          if (data.personal_tasks > 0) {
+            message += `\n\n📝 ${data.personal_tasks} persönliche Aufgabe(n)`;
+          }
+          
+          if (data.invitations_sent > 0) {
+            message += `\n\n📧 ${data.invitations_sent} E-Mail-Einladung(en) versendet`;
+            message += '\n\nEmpfänger erhalten Google Kalender-Einladungen von Ihnen.';
+          }
+          
+          alert(message);
+        } else {
+          console.error('❌ Fehler:', data);
+          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+        }
+        
+      } catch (err) {
+        console.error('❌ Anfrage fehlgeschlagen:', err);
+        alert('❌ Fehler beim Hinzufügen: ' + err.message);
+      }
+    }
+
+    // Function 3: Show/hide calendar buttons
+    function showCalendarButtons() {
+      const container = document.getElementById('calendarButtonsContainer');
+      if (container) {
+        container.classList.remove('hidden');
+      }
+    }
+
+    function hideCalendarButtons() {
+      const container = document.getElementById('calendarButtonsContainer');
+      if (container) {
+        container.classList.add('hidden');
+      }
+    }
+
+    // ==================== INITIALIZE ====================
+    
+    checkAuth();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+Meeting Minutes – Project CCAI
+Date: 10 June 2025
+Time: 10:00–11:30 AM CET
+Attendees: Lena M., Imen H., David R., Thomas J., Amira S.
+
+1. Project Timeline Review
+
+    David presented the updated project roadmap.
+
+    Decision: The beta release is postponed from July 15 to August 5 due to integration issues with the analytics module.
+
+    QA will require an additional sprint (2 weeks) for regression testing.
+
+    Amira raised concerns about overlapping resource allocations with the Gemini project.
+
+2. Architecture Discussion
+
+    Thomas proposed replacing the current message broker with NATS for lower latency.
+
+    Imen asked for a performance benchmark comparison before deciding.
+
+    Action: Thomas to prepare benchmarks comparing RabbitMQ and NATS by next Tuesday (June 17).
+
+    Note: The legacy monolith decommissioning is now tentatively scheduled for September.
+
+3. Security and Compliance Updates
+
+    SOC 2 audit is scheduled to begin July 1st.
+
+    Decision: All code repositories must enable branch protection rules by end of this week.
+
+    Lena will coordinate with the infosec team to ensure encryption at rest is enforced in all cloud buckets.
+
+    Action: Imen to update documentation on new logging requirements by Friday (June 13).
+
+4. UI/UX Feedback from Internal Pilot
+
+    Mixed feedback on dashboard layout; users found filter options too hidden.
+
+    Action: Amira to collaborate with UX team on redesign mockups – due by June 21.
+
+    Decision: Remove the “Experimental Features” toggle until feature set is finalized.
+
+5. Miscellaneous / Next Steps
+
+    Next sprint planning moved to Monday, June 16 at 9:00 AM.
+
+    David will finalize backlog grooming by Friday noon.
+
+    Reminder: Everyone must complete code reviews on current PRs by Thursday EOD.

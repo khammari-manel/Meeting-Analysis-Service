@@ -1,0 +1,32 @@
+# requirements.txt
+
+# Web Framework
+Flask==3.0.0
+Flask-CORS==4.0.0
+Flask-Login==0.6.3
+
+# Database
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.23
+
+# Google APIs
+google-auth==2.25.2
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+google-api-python-client==2.110.0
+
+# Email (optional - if you implement custom email)
+Flask-Mail==0.9.1
+
+# Document Processing
+PyPDF2==3.0.1
+python-docx==1.1.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Utilities
+Werkzeug==3.0.1
