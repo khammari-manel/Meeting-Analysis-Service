@@ -28,5 +28,16 @@ requests==2.31.0
 # Environment Variables
 python-dotenv==1.0.0
 
+# Speech-to-Text (optional - for audio transcription)
+# Local Whisper (free, offline) - install if you want audio/video transcription without API costs
+openai-whisper>=20231117
+# Note: Whisper needs ffmpeg installed on your system
+
+# Speech-to-Text (optional - for free local transcription)
+# Install with: pip install openai-whisper
+# Note: This is OpenAI's open-source Whisper model (free, runs locally)
+# If not installed, you can use OpenAI API instead (paid, requires OPENAI_API_KEY)
+openai-whisper==20231117
+
 # Utilities
 Werkzeug==3.0.1

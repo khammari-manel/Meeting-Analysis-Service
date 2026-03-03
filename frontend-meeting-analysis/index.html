@@ -243,6 +243,45 @@
       color: white;
     }
     
+    .btn-transcribe {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      width: 100%;
+      margin-top: 16px;
+      transition: all 0.3s;
+    }
+    
+    .btn-transcribe:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    .upload-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 24px 0;
+      color: #a0aec0;
+      font-size: 14px;
+    }
+    
+    .upload-divider::before,
+    .upload-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .upload-divider span {
+      padding: 0 16px;
+    }
+    
     .hidden { 
       display: none; 
     }
@@ -338,11 +377,24 @@
 
       <div class="content">
         <div class="upload-section">
-          <label for="file">📄 Meeting-Protokoll hochladen</label>
+          <label for="file">📄 Meeting-Protokoll hochladen (PDF, DOCX, TXT)</label>
           <input type="file" id="file" accept=".pdf,.docx,.txt" />
         </div>
 
         <button class="btn-primary" onclick="submitForm()">Analysieren & Parsen</button>
+
+        <!-- Audio/Video Upload Section -->
+        <div class="upload-divider"><span>ODER</span></div>
+        
+        <div class="upload-section">
+          <label for="audioFile">🎤 Meeting-Aufzeichnung hochladen (Audio/Video)</label>
+          <input type="file" id="audioFile" accept=".mp3,.mp4,.mpeg,.mpga,.m4a,.wav,.webm" />
+          <small style="color: #718096; font-size: 12px; display: block; margin-top: 8px;">
+            Unterstützt: MP3, MP4, WAV, M4A, WebM (max. 25MB)
+          </small>
+        </div>
+
+        <button class="btn-transcribe" onclick="transcribeAndAnalyze()">🎤 Transkribieren & Analysieren</button>
 
         <!-- Calendar & Jira Integration Buttons -->
         <div id="calendarButtonsContainer" class="calendar-buttons-container hidden">
@@ -512,6 +564,79 @@
         
       } catch (err) {
         responseEl.textContent = '❌ Fehler: ' + err.message;
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
+
+    // ==================== TRANSCRIPTION FUNCTION ====================
+    
+    async function transcribeAndAnalyze() {
+      const audioInput = document.getElementById('audioFile');
+      const responseEl = document.getElementById('response');
+      const spinner = document.getElementById('spinner');
+
+      if (!audioInput.files.length) {
+        responseEl.textContent = '⚠️ Bitte eine Audio-/Videodatei hochladen.';
+        return;
+      }
+
+      const file = audioInput.files[0];
+      const fileSizeMB = file.size / 1024 / 1024;
+      
+      if (fileSizeMB > 25) {
+        responseEl.textContent = `❌ Datei zu groß (${fileSizeMB.toFixed(1)}MB). Maximum: 25MB`;
+        return;
+      }
+
+      responseEl.textContent = '🎤 Transkribiere Audio... Dies kann einige Minuten dauern.';
+      spinner.style.display = 'block';
+      hideCalendarButtons();
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('language', 'de'); // German language
+        formData.append('analyze', 'true'); // Automatically analyze after transcription
+
+        const response = await fetch(`${API_URL}/transcribe`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert('Sitzung abgelaufen. Bitte melden Sie sich erneut an.');
+            location.reload();
+            return;
+          }
+          if (response.status === 503) {
+            const errorData = await response.json();
+            responseEl.textContent = `❌ ${errorData.error}\n\nBitte OpenAI API Key in .env konfigurieren.`;
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Check if we have events (analyzed) or just transcript
+        if (data.events) {
+          resultsData = data.events;
+          responseEl.textContent = `✅ Transkription erfolgreich!\n\n📝 Transkript:\n${data.transcript}\n\n📊 Analysierte Events:\n${JSON.stringify(data.events, null, 2)}`;
+          showCalendarButtons();
+        } else {
+          responseEl.textContent = `✅ Transkription erfolgreich!\n\n📝 Transkript:\n${data.transcript}\n\n⚠️ ${data.error || 'Keine Events gefunden'}`;
+        }
+        
+        audioInput.value = '';
+        
+        console.log('✅ Transcription successful:', data);
+        
+      } catch (err) {
+        responseEl.textContent = '❌ Transkriptionsfehler: ' + err.message;
+        console.error('Transcription error:', err);
       } finally {
         spinner.style.display = 'none';
       }

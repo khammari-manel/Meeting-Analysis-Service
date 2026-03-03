@@ -1,5 +1,10 @@
 """Meeting Analysis Backend v2.0 - Multi-User"""
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_login import LoginManager

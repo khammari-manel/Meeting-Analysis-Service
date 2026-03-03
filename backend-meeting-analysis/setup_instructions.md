@@ -27,6 +27,41 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### 3.1 Install ffmpeg (Required for Speech-to-Text)
+
+**Windows (mit Admin-Rechten):**
+```powershell
+# PowerShell als Administrator öffnen
+choco install ffmpeg -y
+# ODER
+winget install ffmpeg
+```
+
+**Windows (ohne Admin):**
+1. Download: https://github.com/BtbN/FFmpeg-Builds/releases
+2. Suche: `ffmpeg-master-latest-win64-gpl.zip`
+3. Entpacke nach `C:\ffmpeg\`
+4. Füge `C:\ffmpeg\bin` zu PATH hinzu (Umgebungsvariablen)
+5. PowerShell neu starten
+
+**Mac:**
+```bash
+brew install ffmpeg
+```
+
+**Linux:**
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+**Testen:**
+```bash
+ffmpeg -version
+```
+
+> ⚠️ **Wichtig:** ffmpeg muss installiert sein, damit lokales Whisper Audio-Dateien dekodieren kann!
+
 ### 4. Configure Environment
 
 **Copy template:**
@@ -39,6 +74,10 @@ cp .env.example .env
 OPENROUTER_API_KEY=sk-or-v1-your-actual-key-here
 SECRET_KEY=generate-this-with-python-command-below
 MOCK_MODE=false
+
+# Optional: OpenAI API Key für Whisper API (kostenpflichtig)
+# Wenn nicht gesetzt, wird automatisch lokales Whisper verwendet (kostenlos)
+# OPENAI_API_KEY=sk-proj-your-key-here
 ```
 
 **Generate secret key:**
@@ -79,7 +118,21 @@ Open `index.html` in browser or use:
 ```bash
 # Windows
 start index.html
+```
 
+## Features
+
+### 📄 Document Analysis
+- Upload PDF, DOCX, TXT meeting protocols
+- AI-powered extraction of action items, dates, attendees
+- Google Calendar & Jira integration
+
+### 🎤 Speech-to-Text (Audio/Video Transcription)
+- Upload MP3, MP4, WAV, M4A, WebM (max 25MB)
+- Automatic transcription with OpenAI Whisper (local, FREE)
+- First transcription: 1-2 minutes (downloads model ~140MB)
+- Subsequent transcriptions: 30-60 seconds per minute of audio
+- Automatically analyzes transcript with AI
 
 ## Testing
 
@@ -94,6 +147,15 @@ start index.html
 1. Set `MOCK_MODE=false` in `.env`
 2. Make sure `OPENROUTER_API_KEY` is set
 3. Upload real meeting protocol
+
+### Test Speech-to-Text
+
+1. Make sure ffmpeg is installed: `ffmpeg -version`
+2. Sign in with Google in the app
+3. Upload audio/video file (MP3, WAV, M4A, etc.)
+4. Click "🎤 Transkribieren & Analysieren"
+5. Wait for transcription (first time takes longer)
+6. View transcript and extracted action items
 
 
 
