@@ -29,7 +29,7 @@ def create_app():
              "supports_credentials": True,
              "max_age": 3600
          }})
-    
+    #testgit
     db.init_app(app)
     
     init_mail(app)
