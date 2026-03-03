@@ -238,6 +238,11 @@
       color: white;
     }
     
+    .btn-jira {
+      background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+      color: white;
+    }
+    
     .hidden { 
       display: none; 
     }
@@ -339,7 +344,7 @@
 
         <button class="btn-primary" onclick="submitForm()">Analysieren & Parsen</button>
 
-        <!-- NEW: Two Calendar Buttons -->
+        <!-- Calendar & Jira Integration Buttons -->
         <div id="calendarButtonsContainer" class="calendar-buttons-container hidden">
           <h3>📅 Events zum Kalender hinzufügen</h3>
           <div class="calendar-buttons">
@@ -348,6 +353,9 @@
             </button>
             <button class="calendar-btn btn-invite" onclick="addWithInvitations()">
               📧 Mit Einladungen senden
+            </button>
+            <button class="calendar-btn btn-jira" onclick="createJiraTasks()">
+              📋 Create Jira Tasks
             </button>
           </div>
         </div>
@@ -662,6 +670,107 @@
       const container = document.getElementById('calendarButtonsContainer');
       if (container) {
         container.classList.add('hidden');
+      }
+    }
+
+    // ==================== JIRA INTEGRATION ====================
+
+    async function createJiraTasks() {
+      if (!resultsData) {
+        alert('❌ Keine Events zum Hinzufügen');
+        return;
+      }
+      
+      console.log('📋 Erstelle Jira Tasks...');
+      
+      try {
+        // First check if Jira is configured
+        const statusResponse = await fetch(`${API_URL}/jira/status`, {
+          credentials: 'include'
+        });
+        
+        const statusData = await statusResponse.json();
+        
+        if (!statusData.configured) {
+          alert('⚠️ Jira ist nicht konfiguriert.\n\n' +
+                'Bitte kontaktieren Sie den Administrator, um Jira-Credentials in der .env Datei zu setzen:\n' +
+                '- JIRA_BASE_URL\n' +
+                '- JIRA_EMAIL\n' +
+                '- JIRA_API_TOKEN\n' +
+                '- JIRA_PROJECT_KEY');
+          return;
+        }
+        
+        // Get preview
+        const previewResponse = await fetch(`${API_URL}/jira/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ events: resultsData })
+        });
+        
+        const preview = await previewResponse.json();
+        
+        console.log('📊 Vorschau:', preview);
+        
+        // Build confirmation message
+        let confirmMessage = `Sie sind dabei, ${preview.total_action_items} Jira Task(s) zu erstellen:\n\n`;
+        
+        if (preview.with_assignee > 0) {
+          confirmMessage += `✅ ${preview.with_assignee} Task(s) mit Assignee\n`;
+        }
+        
+        if (preview.without_assignee > 0) {
+          confirmMessage += `⚠️ ${preview.without_assignee} Task(s) ohne Assignee (werden als "Unassigned" erstellt)\n`;
+        }
+        
+        confirmMessage += '\n\nFortfahren?';
+        
+        // Show confirmation dialog
+        if (!confirm(confirmMessage)) {
+          console.log('❌ Benutzer hat abgebrochen');
+          return;
+        }
+        
+        // User confirmed - create Jira tasks
+        const response = await fetch(`${API_URL}/jira/create-tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ events: resultsData })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log('✅ Jira-Antwort:', data);
+          
+          let message = `✅ Erfolgreich ${data.created_count} Jira Issue(s) erstellt!\n\n`;
+          
+          if (data.created_count > 0) {
+            message += 'Erstelle Issues:\n';
+            data.issues.slice(0, 5).forEach(issue => {
+              message += `• ${issue.jira_key}: ${issue.task.substring(0, 50)}...\n`;
+            });
+            
+            if (data.created_count > 5) {
+              message += `\n... und ${data.created_count - 5} weitere`;
+            }
+          }
+          
+          if (data.failed_count > 0) {
+            message += `\n\n❌ ${data.failed_count} Task(s) konnten nicht erstellt werden`;
+          }
+          
+          alert(message);
+        } else {
+          console.error('❌ Fehler:', data);
+          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+        }
+        
+      } catch (err) {
+        console.error('❌ Anfrage fehlgeschlagen:', err);
+        alert('❌ Fehler beim Erstellen der Jira Tasks: ' + err.message);
       }
     }
 

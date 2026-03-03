@@ -11,6 +11,7 @@ from api.parse_routes import parse_bp
 from api.calendar_routes import calendar_bp
 from api.task_routes import task_bp
 from api.notification_routes import notification_bp
+from api.jira_routes import jira_bp
 
 from integrations.email_service import init_mail
 def create_app():
@@ -45,6 +46,7 @@ def create_app():
     app.register_blueprint(calendar_bp, url_prefix='/calendar')
     app.register_blueprint(task_bp, url_prefix='/tasks')  
     app.register_blueprint(notification_bp, url_prefix='/notifications')
+    app.register_blueprint(jira_bp, url_prefix='/jira')
     
     # Additional CORS handler for all requests
     @app.after_request
