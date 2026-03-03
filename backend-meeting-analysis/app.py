@@ -1,6 +1,6 @@
 """Meeting Analysis Backend v2.0 - Multi-User"""
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_login import LoginManager
 
@@ -11,6 +11,7 @@ from api.parse_routes import parse_bp
 from api.calendar_routes import calendar_bp
 from api.task_routes import task_bp
 from api.notification_routes import notification_bp
+from api.jira_routes import jira_bp
 
 from integrations.email_service import init_mail
 def create_app():
@@ -18,12 +19,17 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    # Configure CORS to allow all origins (including file://)
     CORS(app,
-         supports_credentials=True,
-         origins=Config.CORS_ORIGINS,
-         allow_headers=["Content-Type"],
-         methods=["GET", "POST", "OPTIONS"])
-    
+         resources={r"/*": {
+             "origins": "*",
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization", "Accept"],
+             "expose_headers": ["Content-Type"],
+             "supports_credentials": True,
+             "max_age": 3600
+         }})
+    #testgit
     db.init_app(app)
     
     init_mail(app)
@@ -40,6 +46,19 @@ def create_app():
     app.register_blueprint(calendar_bp, url_prefix='/calendar')
     app.register_blueprint(task_bp, url_prefix='/tasks')  
     app.register_blueprint(notification_bp, url_prefix='/notifications')
+    app.register_blueprint(jira_bp, url_prefix='/jira')
+    
+    # Additional CORS handler for all requests
+    @app.after_request
+    def after_request(response):
+        origin = request.headers.get('Origin')
+        if origin:
+            response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,Accept'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+        return response
+    
     @app.route("/", methods=["GET"])
     def home():
         return jsonify({

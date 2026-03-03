@@ -16,7 +16,8 @@ if not api_key and not mock_mode:
     raise ValueError("Bitte OPENROUTER_API_KEY in der Umgebung setzen!")
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "mistralai/mistral-7b-instruct"
+MODEL = "mistralai/mistral-nemo"
+#MODEL = "mistralai/mistral-7b-instruct"
 HEADERS = {
     "Authorization": f"Bearer {api_key}",
     "Content-Type": "application/json",

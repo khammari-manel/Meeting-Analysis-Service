@@ -5,4 +5,7 @@ client_secret.json
 __pycache__/
 instance/
 .venv/
+venv/
+*.pyc
+.pytest_cache/
 .vscode/
