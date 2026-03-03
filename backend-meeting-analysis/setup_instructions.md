@@ -29,9 +29,12 @@ pip install -r requirements.txt
 
 ### 3.1 Install ffmpeg (Required for Speech-to-Text)
 
-**Windows (mit Admin-Rechten):**
+**Was ist ffmpeg?**
+ffmpeg ist ein Audio/Video-Decoder, den OpenAI Whisper benötigt, um Audio-Dateien (MP3, WAV, M4A, etc.) zu verarbeiten. Ohne ffmpeg kann Whisper keine Audio-Dateien transkribieren.
+
+**Windows (mit Admin-Rechten - EMPFOHLEN):**
 ```powershell
-# PowerShell als Administrator öffnen
+# PowerShell als Administrator öffnen (Rechtsklick → "Als Administrator ausführen")
 choco install ffmpeg -y
 # ODER
 winget install ffmpeg
@@ -39,28 +42,66 @@ winget install ffmpeg
 
 **Windows (ohne Admin):**
 1. Download: https://github.com/BtbN/FFmpeg-Builds/releases
-2. Suche: `ffmpeg-master-latest-win64-gpl.zip`
+2. Suche: `ffmpeg-master-latest-win64-gpl.zip` (~100MB)
 3. Entpacke nach `C:\ffmpeg\`
-4. Füge `C:\ffmpeg\bin` zu PATH hinzu (Umgebungsvariablen)
-5. PowerShell neu starten
+4. Füge `C:\ffmpeg\bin` zu PATH hinzu:
+   - Windows-Suche: "Umgebungsvariablen"
+   - "Umgebungsvariablen bearbeiten"
+   - Unter "Benutzervariablen" → PATH → "Bearbeiten" → "Neu"
+   - Pfad hinzufügen: `C:\ffmpeg\bin`
+   - Alle Fenster mit "OK" schließen
+5. **PowerShell NEU STARTEN** (wichtig!)
 
 **Mac:**
 ```bash
 brew install ffmpeg
 ```
 
-**Linux:**
+**Linux (Ubuntu/Debian):**
 ```bash
 sudo apt update
 sudo apt install ffmpeg
 ```
 
-**Testen:**
+**Testen (nach Installation PowerShell NEU STARTEN!):**
 ```bash
 ffmpeg -version
 ```
 
-> ⚠️ **Wichtig:** ffmpeg muss installiert sein, damit lokales Whisper Audio-Dateien dekodieren kann!
+Du solltest die ffmpeg-Version sehen (z.B. `ffmpeg version 8.0.1`).
+
+> ⚠️ **WICHTIG:** 
+> - ffmpeg MUSS installiert sein, sonst funktioniert Speech-to-Text nicht!
+> - Nach Installation: PowerShell/Terminal NEU STARTEN
+> - Bei Fehler "Das System kann die angegebene Datei nicht finden" → ffmpeg fehlt
+
+### 3.2 Install OpenAI Whisper (Automatisch bei pip install)
+
+Das lokale Whisper-Paket wird automatisch mit `pip install -r requirements.txt` installiert.
+
+**Was ist Whisper?**
+- OpenAI's Speech-to-Text AI (Open Source, kostenlos)
+- Läuft lokal auf deinem Computer (keine API-Kosten)
+- Unterstützt 99+ Sprachen (Deutsch, Englisch, etc.)
+- Base-Modell: ~140MB, gute Balance zwischen Geschwindigkeit/Qualität
+
+**Beim ersten Mal:**
+- Whisper lädt automatisch das Base-Modell (~140MB) herunter
+- Dauert ca. 1-2 Minuten (nur einmal!)
+- Modell wird gespeichert: `~/.cache/whisper/`
+
+**Danach:**
+- Transkription: ~30-60 Sekunden pro Minute Audio
+- Komplett offline und kostenlos
+- Keine API-Limits
+
+**Verfügbare Modelle (optional):**
+Standardmäßig nutzen wir das `base` Modell (empfohlen). Änderbar in `integrations/whisper_service.py`:
+- `tiny`: 39MB, sehr schnell, weniger genau
+- `base`: 74MB, schnell, gut genau ✅ (Standard)
+- `small`: 244MB, langsamer, sehr genau
+- `medium`: 769MB, langsam, sehr genau
+- `large`: 1550MB, sehr langsam, höchste Genauigkeit
 
 ### 4. Configure Environment
 

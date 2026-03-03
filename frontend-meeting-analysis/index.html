@@ -243,25 +243,6 @@
       color: white;
     }
     
-    .btn-transcribe {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      width: 100%;
-      margin-top: 16px;
-      transition: all 0.3s;
-    }
-    
-    .btn-transcribe:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-    }
-    
     .upload-divider {
       display: flex;
       align-items: center;
@@ -394,7 +375,7 @@
           </small>
         </div>
 
-        <button class="btn-transcribe" onclick="transcribeAndAnalyze()">🎤 Transkribieren & Analysieren</button>
+        <button class="btn-primary" onclick="transcribeAndAnalyze()">🎤 Transkribieren & Analysieren</button>
 
         <!-- Calendar & Jira Integration Buttons -->
         <div id="calendarButtonsContainer" class="calendar-buttons-container hidden">
