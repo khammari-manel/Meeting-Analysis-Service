@@ -17,13 +17,15 @@ from api.calendar_routes import calendar_bp
 from api.task_routes import task_bp
 from api.notification_routes import notification_bp
 from api.jira_routes import jira_bp
+from api.drive_routes import drive_bp
 
 from integrations.email_service import init_mail
+
 def create_app():
     """Application factory"""
     app = Flask(__name__)
     app.config.from_object(Config)
-    
+
     # Configure CORS to allow all origins (including file://)
     CORS(app,
          resources={r"/*": {
@@ -36,23 +38,24 @@ def create_app():
          }})
     #testgit
     db.init_app(app)
-    
+
     init_mail(app)
-    
+
     login_manager = LoginManager()
     login_manager.init_app(app)
-    
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-    
+
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(parse_bp, url_prefix='')
     app.register_blueprint(calendar_bp, url_prefix='/calendar')
-    app.register_blueprint(task_bp, url_prefix='/tasks')  
+    app.register_blueprint(task_bp, url_prefix='/tasks')
     app.register_blueprint(notification_bp, url_prefix='/notifications')
     app.register_blueprint(jira_bp, url_prefix='/jira')
-    
+    app.register_blueprint(drive_bp, url_prefix='/drive')
+
     # Additional CORS handler for all requests
     @app.after_request
     def after_request(response):
@@ -63,7 +66,7 @@ def create_app():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,Accept'
         response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
         return response
-    
+
     @app.route("/", methods=["GET"])
     def home():
         return jsonify({
@@ -78,20 +81,23 @@ def create_app():
                 "/auth/me": "GET - Get current user",
                 "/auth/logout": "POST - Logout",
                 "/parse": "POST - Parse meeting documents",
-                "/calendar/add": "POST - Add events to calendar"
+                "/calendar/add": "POST - Add events to calendar",
+                "/drive/files": "GET - List personal Drive files",
+                "/drive/team-folder": "GET - List team folder files",
+                "/drive/parse": "POST - Parse file directly from Drive",
             }
         })
-    
+
     @app.route("/health", methods=["GET"])
     def health():
         return jsonify({
             "status": "healthy",
             "rabbitmq_configured": bool(Config.CLOUDAMQP_URL),
             "openrouter_configured": bool(Config.OPENROUTER_API_KEY),
-            "mock_mode": Config.MOCK_MODE
+            "mock_mode": Config.MOCK_MODE,
+            "drive_configured": bool(Config.TEAM_DRIVE_FOLDER_ID),  #
         })
-        
-    
+
     @app.route("/me", methods=["GET"])
     def me():
         """Get current user - kept at root for backward compatibility"""
@@ -105,34 +111,39 @@ def create_app():
             })
         else:
             return jsonify({'error': 'Not authenticated'}), 401
+
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    
+
     with app.app_context():
         db.create_all()
-        print(" Database initialized")
-    
+        print("✅ Database initialized")
+
     print("=" * 70)
     print("🚀 Meeting Analysis Backend v2.0 - Multi-User")
     print("=" * 70)
     print(f"\n Server starting on port {Config.PORT}")
     print(f"\n Available Endpoints:")
-    print(f"   GET  /              → Service info")
-    print(f"   GET  /health        → Health check")
-    print(f"   GET  /auth/google   → Sign in with Google")
-    print(f"   GET  /auth/me       → Current user info")
-    print(f"   POST /parse         → Parse meeting documents")
-    print(f"   POST /calendar/add  → Add events to calendar")
-    print(f"   POST /auth/logout   → Logout")
+    print(f"   GET  /                   → Service info")
+    print(f"   GET  /health             → Health check")
+    print(f"   GET  /auth/google        → Sign in with Google")
+    print(f"   GET  /auth/me            → Current user info")
+    print(f"   POST /parse              → Parse meeting documents")
+    print(f"   POST /calendar/add       → Add events to calendar")
+    print(f"   POST /auth/logout        → Logout")
+    print(f"   GET  /drive/files        → List personal Drive files")
+    print(f"   GET  /drive/team-folder  → List team folder files")
+    print(f"   POST /drive/parse        → Parse file from Drive")
     print(f"\n Configuration:")
-    print(f"   MOCK_MODE:  {Config.MOCK_MODE}")
-    print(f"   RabbitMQ:   {'✅ Configured' if Config.CLOUDAMQP_URL else '❌ Not configured'}")
-    print(f"   OpenRouter: {'✅ Configured' if Config.OPENROUTER_API_KEY else '❌ Not configured'}")
+    print(f"   MOCK_MODE:     {Config.MOCK_MODE}")
+    print(f"   RabbitMQ:      {'✅ Configured' if Config.CLOUDAMQP_URL else '❌ Not configured'}")
+    print(f"   OpenRouter:    {'✅ Configured' if Config.OPENROUTER_API_KEY else '❌ Not configured'}")
+    print(f"   Team Drive:    {'✅ Configured' if Config.TEAM_DRIVE_FOLDER_ID else '❌ Not configured'}")
     print("\n" + "=" * 70)
     print("✅ Ready for multi-user meeting analysis!")
     print("=" * 70 + "\n")
-    
+
     app.run(host="0.0.0.0", port=Config.PORT, debug=True)
