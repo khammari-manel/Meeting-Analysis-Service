@@ -29,6 +29,12 @@ class Config:
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
     MOCK_MODE = os.getenv('MOCK_MODE', 'false').lower() == 'true'
 
+    # Jira
+    JIRA_BASE_URL = os.getenv('JIRA_BASE_URL')
+    JIRA_EMAIL = os.getenv('JIRA_EMAIL')
+    JIRA_API_TOKEN = os.getenv('JIRA_API_TOKEN')
+    JIRA_PROJECT_KEY = os.getenv('JIRA_PROJECT_KEY', 'SCRUM')
+
     # RabbitMQ
     CLOUDAMQP_URL = os.getenv('CLOUDAMQP_URL')
 
