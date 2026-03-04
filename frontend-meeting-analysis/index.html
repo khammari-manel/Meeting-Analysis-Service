@@ -1,1022 +1,845 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Meeting Parser - Multi-User</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      color: #1a202c;
-    }
-    
-    .container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 700px;
-      width: 100%;
-      overflow: hidden;
-    }
-    
-    /* Header */
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 32px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    
-    .header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    
-    /* Login Section */
-    .login-container {
-      padding: 48px 32px;
-      text-align: center;
-    }
-    
-    .login-container h2 {
-      font-size: 24px;
-      margin-bottom: 12px;
-      color: #2d3748;
-    }
-    
-    .login-container p {
-      color: #718096;
-      margin-bottom: 32px;
-    }
-    
-    .google-btn {
-      background: white;
-      color: #2d3748;
-      border: 2px solid #e2e8f0;
-      padding: 14px 28px;
-      font-size: 16px;
-      font-weight: 500;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      transition: all 0.3s;
-    }
-    
-    .google-btn:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-    }
-    
-    /* User Info Bar */
-    .user-info {
-      background: #f7fafc;
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .user-info span {
-      font-size: 14px;
-      color: #4a5568;
-    }
-    
-    .logout-btn {
-      background: transparent;
-      color: #e53e3e;
-      border: 1px solid #e53e3e;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    
-    .logout-btn:hover {
-      background: #e53e3e;
-      color: white;
-    }
-    
-    /* Main Content */
-    .content {
-      padding: 32px;
-    }
-    
-    .upload-section {
-      background: #f7fafc;
-      border: 2px dashed #cbd5e0;
-      border-radius: 12px;
-      padding: 32px;
-      text-align: center;
-      margin-bottom: 24px;
-      transition: all 0.3s;
-    }
-    
-    .upload-section:hover {
-      border-color: #667eea;
-      background: #edf2f7;
-    }
-    
-    .upload-section label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #4a5568;
-      margin-bottom: 16px;
-    }
-    
-    input[type="file"] {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background: white;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    
-    input[type="file"]:hover {
-      border-color: #667eea;
-    }
-    
-    /* Buttons */
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      width: 100%;
-      margin-top: 16px;
-      transition: all 0.3s;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-    }
-    
-    /* Calendar Buttons Container */
-    .calendar-buttons-container {
-      margin-top: 24px;
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-      border-radius: 12px;
-      border: 2px solid #667eea30;
-    }
-    
-    .calendar-buttons-container h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    
-    .calendar-buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    
-    .calendar-btn {
-      flex: 1;
-      min-width: 200px;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    
-    .calendar-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    }
-    
-    .calendar-btn:active {
-      transform: translateY(-1px);
-    }
-    
-    .btn-personal {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-invite {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-    }
-    
-    .btn-jira {
-      background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
-      color: white;
-    }
-    
-    .upload-divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      margin: 24px 0;
-      color: #a0aec0;
-      font-size: 14px;
-    }
-    
-    .upload-divider::before,
-    .upload-divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .upload-divider span {
-      padding: 0 16px;
-    }
-    
-    .hidden { 
-      display: none; 
-    }
-    
-    /* Response Section */
-    .response-section {
-      margin-top: 32px;
-    }
-    
-    .response-section h2 {
-      font-size: 18px;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 16px;
-    }
-    
-    pre {
-      background: #2d3748;
-      color: #e2e8f0;
-      padding: 20px;
-      border-radius: 8px;
-      overflow-x: auto;
-      max-height: 400px;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    
-    /* Spinner */
-    #spinner {
-      display: none;
-      text-align: center;
-      padding: 32px;
-    }
-    
-    .spinner {
-      border: 3px solid #e2e8f0;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-    
-    #spinner p {
-      color: #718096;
-      font-size: 14px;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Parser</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #080c14;
+            --surface:   #0e1420;
+            --surface2:  #151c2e;
+            --surface3:  #1c2540;
+            --border:    #1f2d4a;
+            --border2:   #2a3d60;
+            --accent:    #3d8ef0;
+            --accent-g:  #00d68f;
+            --accent-r:  #f05d5d;
+            --accent-y:  #f0b83d;
+            --text:      #dce8ff;
+            --text-2:    #7a92bc;
+            --text-3:    #3d5278;
+            --radius:    12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                    linear-gradient(rgba(61,142,240,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(61,142,240,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none; z-index: 0;
+        }
+
+        .container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 780px; width: 100%;
+            overflow: hidden; position: relative; z-index: 1;
+            box-shadow: 0 0 0 1px rgba(61,142,240,0.05), 0 32px 80px rgba(0,0,0,0.6);
+        }
+
+        /* HEADER */
+        .header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 16px;
+            background: linear-gradient(135deg, rgba(61,142,240,0.06) 0%, transparent 60%);
+        }
+
+        .logo {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, var(--accent) 0%, #6ab4ff 100%);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(61,142,240,0.3);
+        }
+
+        .header-text h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-text p  { font-size: 12px; color: var(--text-2); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+
+        /* LOGIN */
+        #loginSection .header { justify-content: center; flex-direction: column; text-align: center; padding: 48px 32px 40px; border: none; background: none; }
+        #loginSection .logo   { width: 56px; height: 56px; font-size: 28px; margin-bottom: 8px; }
+        #loginSection .header-text h1 { font-size: 28px; }
+        #loginSection .header-text p  { font-size: 13px; margin-top: 6px; }
+
+        .login-body { padding: 0 40px 48px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+        .google-btn {
+            background: var(--surface2); color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 13px 28px; font-size: 14px; font-weight: 600;
+            font-family: 'Syne', sans-serif; border-radius: var(--radius);
+            cursor: pointer; display: inline-flex; align-items: center; gap: 12px;
+            transition: all 0.2s; letter-spacing: 0.2px;
+        }
+        .google-btn:hover { border-color: var(--accent); background: rgba(61,142,240,0.08); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(61,142,240,0.15); }
+
+        /* USER BAR */
+        .user-bar {
+            padding: 12px 32px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+        .user-pill { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); }
+        .avatar {
+            width: 26px; height: 26px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-g));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white;
+        }
+        .bar-actions { display: flex; gap: 8px; }
+        .btn-sm {
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            font-family: 'Syne', sans-serif; cursor: pointer;
+            border: 1px solid var(--border2); background: transparent; color: var(--text-2);
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { color: var(--text); border-color: var(--accent); }
+        .btn-sm.danger { color: var(--accent-r); border-color: rgba(240,93,93,0.3); }
+        .btn-sm.danger:hover { background: rgba(240,93,93,0.08); }
+
+        /* CONTENT */
+        .content { padding: 28px 32px; }
+
+        /* SOURCE TABS */
+        .source-tabs {
+            display: flex; background: var(--bg);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 4px; gap: 4px; margin-bottom: 24px;
+        }
+        .source-tab {
+            flex: 1; padding: 9px 12px; border: none; border-radius: 9px;
+            background: transparent; color: var(--text-3);
+            font-size: 13px; font-weight: 600; font-family: 'Syne', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .source-tab:hover { color: var(--text-2); }
+        .source-tab.active {
+            background: var(--surface3); color: var(--text);
+            border: 1px solid var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); transition: background 0.2s; }
+        .source-tab.active .tab-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+        /* PANELS */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* DROP ZONE */
+        .drop-zone {
+            border: 2px dashed var(--border2); border-radius: var(--radius);
+            padding: 40px 24px; text-align: center;
+            background: rgba(255,255,255,0.01);
+            transition: all 0.25s; cursor: pointer; position: relative;
+        }
+        .drop-zone:hover { border-color: var(--accent); background: rgba(61,142,240,0.04); }
+        .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+        .dz-icon  { font-size: 36px; margin-bottom: 12px; display: block; }
+        .dz-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .dz-sub   { font-size: 12px; color: var(--text-2); }
+        .dz-formats { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .fmt-badge {
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            padding: 3px 10px; border-radius: 20px;
+            border: 1px solid var(--border2); color: var(--text-2);
+        }
+
+        .file-chip {
+            display: none; align-items: center; gap: 10px; margin-top: 14px;
+            padding: 10px 14px; background: rgba(61,142,240,0.08);
+            border: 1px solid rgba(61,142,240,0.25); border-radius: 10px; font-size: 13px;
+        }
+        .file-chip.show { display: flex; }
+        .file-chip-name { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-chip-size { font-size: 11px; color: var(--text-2); white-space: nowrap; }
+        .file-chip-rm   { background: none; border: none; color: var(--accent-r); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; flex-shrink: 0; }
+
+        /* DRIVE BROWSER */
+        .drive-browser { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
+
+        .drive-subtabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface2); }
+        .drive-subtab {
+            flex: 1; padding: 11px 16px; border: none; background: transparent;
+            color: var(--text-2); font-size: 12px; font-weight: 600;
+            font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .drive-subtab:hover { color: var(--text); }
+        .drive-subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .drive-toolbar {
+            padding: 10px 14px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(0,0,0,0.15); flex-wrap: wrap;
+        }
+        .breadcrumb { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; flex-wrap: wrap; }
+        .crumb {
+            font-size: 12px; color: var(--text-2); cursor: pointer;
+            padding: 3px 7px; border-radius: 6px; white-space: nowrap;
+            transition: all 0.15s; font-family: 'JetBrains Mono', monospace;
+        }
+        .crumb:hover { background: var(--surface3); color: var(--text); }
+        .crumb.active { color: var(--text); cursor: default; font-weight: 500; }
+        .crumb-sep { color: var(--text-3); font-size: 12px; }
+
+        .drive-search {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); padding: 7px 12px; border-radius: 8px;
+            font-size: 12px; font-family: 'JetBrains Mono', monospace;
+            outline: none; transition: border-color 0.2s; width: 160px;
+        }
+        .drive-search:focus { border-color: var(--accent); }
+        .drive-search::placeholder { color: var(--text-3); }
+
+        .drive-refresh {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text-2); padding: 7px 10px; border-radius: 8px;
+            font-size: 14px; cursor: pointer; transition: all 0.2s; line-height: 1;
+        }
+        .drive-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+        .drive-list { min-height: 280px; max-height: 380px; overflow-y: auto; }
+        .drive-list::-webkit-scrollbar { width: 5px; }
+        .drive-list::-webkit-scrollbar-track { background: transparent; }
+        .drive-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+        .drive-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 260px; gap: 12px; color: var(--text-2); font-size: 13px; text-align: center;
+        }
+        .drive-state-icon { font-size: 32px; opacity: 0.4; }
+
+        .drive-spin {
+            width: 22px; height: 22px;
+            border: 2px solid var(--border2); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .drive-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            transition: all 0.15s; user-select: none;
+        }
+        .drive-item:hover { background: rgba(61,142,240,0.05); }
+        .drive-item.selected { background: rgba(61,142,240,0.1); border-left: 3px solid var(--accent); padding-left: 13px; }
+        .drive-item:last-child { border-bottom: none; }
+
+        .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+        .di-info { flex: 1; min-width: 0; }
+        .di-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .di-meta { font-size: 10px; color: var(--text-2); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+        .di-badge {
+            font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
+            padding: 2px 8px; border-radius: 20px; flex-shrink: 0; letter-spacing: 0.5px;
+        }
+        .badge-pdf  { background: rgba(240,93,93,0.12);  color: #f07d7d; border: 1px solid rgba(240,93,93,0.2); }
+        .badge-docx { background: rgba(61,142,240,0.12); color: #6aadff; border: 1px solid rgba(61,142,240,0.2); }
+        .badge-txt  { background: rgba(0,214,143,0.12);  color: #00d68f; border: 1px solid rgba(0,214,143,0.2); }
+        .badge-dir  { background: rgba(240,184,61,0.12); color: #f0c86a; border: 1px solid rgba(240,184,61,0.2); }
+
+        .di-arrow { font-size: 12px; color: var(--text-3); opacity: 0; transition: opacity 0.15s; }
+        .drive-item:hover .di-arrow { opacity: 1; }
+
+        .drive-selected-bar {
+            display: none; align-items: center; gap: 10px;
+            padding: 10px 16px; border-top: 1px solid var(--border);
+            background: rgba(61,142,240,0.06); font-size: 12px;
+        }
+        .drive-selected-bar.show { display: flex; }
+        .dsb-name { flex: 1; font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dsb-clear { background: none; border: none; color: var(--accent-r); cursor: pointer; font-size: 14px; flex-shrink: 0; }
+
+        /* LANG / SELECT */
+        .lang-row { margin-top: 16px; }
+        .lang-row label { font-size: 11px; color: var(--text-2); display: block; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+        select {
+            width: 100%; padding: 10px 14px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text);
+            font-size: 13px; font-family: 'Syne', sans-serif;
+            outline: none; cursor: pointer; transition: border-color 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%233d5278' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+        }
+        select:focus { border-color: var(--accent); }
+
+        /* PRIMARY BUTTON */
+        .btn-primary {
+            width: 100%; padding: 14px 24px;
+            background: var(--accent); color: white; border: none;
+            border-radius: var(--radius); font-size: 14px; font-weight: 700;
+            font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s;
+            letter-spacing: 0.3px; margin-top: 16px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:hover:not(:disabled) { background: #5aa0f5; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(61,142,240,0.35); }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        /* CALENDAR */
+        .cal-section {
+            margin-top: 24px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
+        }
+        .cal-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; }
+        .cal-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .cal-btn {
+            flex: 1; min-width: 140px; padding: 11px 14px;
+            border-radius: 10px; border: 1px solid var(--border2);
+            background: var(--bg); color: var(--text-2);
+            font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .cal-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .cal-personal:hover { border-color: var(--accent);  color: var(--accent); }
+        .cal-invite:hover   { border-color: var(--accent-y); color: var(--accent-y); }
+        .cal-jira:hover     { border-color: #2684ff;          color: #4d9fff; }
+
+        /* SPINNER */
+        #spinner { display: none; align-items: center; justify-content: center; gap: 12px; padding: 28px 0; color: var(--text-2); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+        #spinner.show { display: flex; }
+
+        /* RESULT */
+        .result-section { margin-top: 24px; }
+        .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .result-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+        .result-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .rb-empty { background: var(--surface3); color: var(--text-3); }
+        .rb-ok    { background: rgba(0,214,143,0.12); color: var(--accent-g); border: 1px solid rgba(0,214,143,0.2); }
+        .rb-error { background: rgba(240,93,93,0.12);  color: var(--accent-r); border: 1px solid rgba(240,93,93,0.2); }
+
+        pre {
+            background: var(--bg); border: 1px solid var(--border); color: #8ba4d0;
+            padding: 18px; border-radius: var(--radius);
+            overflow-x: auto; max-height: 380px;
+            font-size: 11px; line-height: 1.8;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre-wrap; word-break: break-word;
+        }
+
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
+<div class="container">
 
-  <div class="container">
-    <!-- Login Section -->
+    <!-- LOGIN -->
     <div id="loginSection">
-      <div class="header">
-        <h1 data-i18n="app.title">📅 Meeting Parser</h1>
-        <p data-i18n="app.subtitle">Intelligente Meeting-Analyse für Ihr Team</p>
-      </div>
-      <div class="login-container">
-        <h2 data-i18n="login.welcome">Willkommen zurück</h2>
-        <p data-i18n="login.subtitle">Melden Sie sich mit Ihrem Google-Konto an</p>
-        <button class="google-btn" onclick="handleGoogleSignIn()">
-          <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-            <g fill="currentColor" fill-rule="evenodd">
-              <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z"></path>
-              <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"></path>
-              <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z"></path>
-              <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z"></path>
-            </g>
-          </svg>
-          <span data-i18n="login.button">Mit Google anmelden</span>
-        </button>
-        <div style="margin-top: 24px;">
-          <button class="lang-btn" onclick="toggleLanguage()" style="background: transparent; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🇩🇪 DE</button>
+        <div class="header">
+            <div class="logo">📅</div>
+            <div class="header-text">
+                <h1 data-i18n="app.title">Meeting Parser</h1>
+                <p>v2.0 · intelligent meeting analysis</p>
+            </div>
         </div>
-      </div>
+        <div class="login-body">
+            <button class="google-btn" onclick="handleGoogleSignIn()">
+                <svg width="17" height="17" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"/>
+                    <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"/>
+                    <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"/>
+                    <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"/>
+                </svg>
+                <span data-i18n="login.button">Mit Google anmelden</span>
+            </button>
+            <button class="btn-sm" onclick="toggleLanguage()">🇩🇪 DE</button>
+        </div>
     </div>
 
-    <!-- App Section -->
+    <!-- APP -->
     <div id="appSection" class="hidden">
-      <div class="header">
-        <h1 data-i18n="app.title">📅 Meeting Parser</h1>
-        <p data-i18n="app.subtitle">Intelligente Meeting-Analyse für Ihr Team</p>
-      </div>
-      
-      <div class="user-info">
-        <span>👤 <strong id="userName"></strong></span>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="lang-btn" onclick="toggleLanguage()" style="background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">🇩🇪 DE</button>
-          <button class="logout-btn" onclick="handleLogout()" data-i18n="user.logout">Abmelden</button>
-        </div>
-      </div>
-
-      <div class="content">
-        <div class="upload-section">
-          <label for="file" data-i18n="upload.document">📄 Meeting-Protokoll hochladen (PDF, DOCX, TXT)</label>
-          <input type="file" id="file" accept=".pdf,.docx,.txt" />
+        <div class="header">
+            <div class="logo">📅</div>
+            <div class="header-text">
+                <h1>Meeting Parser</h1>
+                <p>v2.0 · intelligent meeting analysis</p>
+            </div>
         </div>
 
-        <button class="btn-primary" onclick="submitForm()" data-i18n="button.analyze">Analysieren & Parsen</button>
-
-        <!-- Audio/Video Upload Section -->
-        <div class="upload-divider"><span data-i18n="upload.divider">ODER</span></div>
-        
-        <div class="upload-section">
-          <label for="audioFile" data-i18n="upload.audio">🎤 Meeting-Aufzeichnung hochladen (Audio/Video)</label>
-          <input type="file" id="audioFile" accept=".mp3,.mp4,.mpeg,.mpga,.m4a,.wav,.webm" />
-          <small data-i18n="upload.audio.hint" style="color: #718096; font-size: 12px; display: block; margin-top: 8px;">
-            Unterstützt: MP3, MP4, WAV, M4A, WebM (max. 25MB)
-          </small>
-          <div style="margin-top: 12px;">
-            <label for="whisperLang" style="font-size: 13px; color: #4a5568; font-weight: 500;" data-i18n="upload.language">🌐 Sprache:</label>
-            <select id="whisperLang" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; margin-top: 6px;">
-              <option value="de" data-i18n="lang.german">Deutsch</option>
-              <option value="en" data-i18n="lang.english">Englisch</option>
-            </select>
-          </div>
+        <div class="user-bar">
+            <div class="user-pill">
+                <div class="avatar" id="userAvatar">?</div>
+                <span id="userName">–</span>
+            </div>
+            <div class="bar-actions">
+                <button class="btn-sm" onclick="toggleLanguage()">🇩🇪 DE</button>
+                <button class="btn-sm danger" onclick="handleLogout()" data-i18n="user.logout">Abmelden</button>
+            </div>
         </div>
 
-        <button class="btn-primary" onclick="transcribeAndAnalyze()" data-i18n="button.transcribe">🎤 Transkribieren & Analysieren</button>
+        <div class="content">
 
-        <!-- Calendar & Jira Integration Buttons -->
-        <div id="calendarButtonsContainer" class="calendar-buttons-container hidden">
-          <h3 data-i18n="calendar.title">📅 Events zum Kalender hinzufügen</h3>
-          <div class="calendar-buttons">
-            <button class="calendar-btn btn-personal" onclick="addToMyCalendar()" data-i18n="calendar.personal">
-              📝 Nur zu meinem Kalender
-            </button>
-            <button class="calendar-btn btn-invite" onclick="addWithInvitations()" data-i18n="calendar.invite">
-              📧 Mit Einladungen senden
-            </button>
-            <button class="calendar-btn btn-jira" onclick="createJiraTasks()" data-i18n="calendar.jira">
-              📋 Jira Tasks erstellen
-            </button>
-          </div>
-        </div>
+            <!-- SOURCE TABS -->
+            <div class="source-tabs">
+                <button class="source-tab active" onclick="switchSourceTab('document')" id="tab-document">
+                    <span class="tab-dot"></span><span data-i18n="tab.document">📄 Protokoll</span>
+                </button>
+                <button class="source-tab" onclick="switchSourceTab('drive')" id="tab-drive">
+                    <span class="tab-dot"></span><span data-i18n="tab.drive">☁️ Google Drive</span>
+                </button>
+                <button class="source-tab" onclick="switchSourceTab('audio')" id="tab-audio">
+                    <span class="tab-dot"></span><span data-i18n="tab.audio">🎤 Audio/Video</span>
+                </button>
+            </div>
 
-        <div id="spinner">
-          <div class="spinner"></div>
-          <p data-i18n="processing">Wird verarbeitet...</p>
-        </div>
+            <!-- PANEL: LOCAL UPLOAD -->
+            <div class="panel active" id="panel-document">
+                <div class="drop-zone">
+                    <input type="file" id="file" accept=".pdf,.docx,.txt" onchange="onFileSelected(this,'doc')">
+                    <span class="dz-icon">📄</span>
+                    <div class="dz-title" data-i18n="upload.drop">Datei hier ablegen oder klicken</div>
+                    <div class="dz-sub"   data-i18n="upload.doc.sub">Meeting-Protokoll hochladen</div>
+                    <div class="dz-formats">
+                        <span class="fmt-badge">PDF</span>
+                        <span class="fmt-badge">DOCX</span>
+                        <span class="fmt-badge">TXT</span>
+                    </div>
+                </div>
+                <div class="file-chip" id="docChip">
+                    <span>📄</span>
+                    <span class="file-chip-name" id="docChipName">–</span>
+                    <span class="file-chip-size" id="docChipSize">–</span>
+                    <button class="file-chip-rm" onclick="clearFile('doc')">✕</button>
+                </div>
+                <button class="btn-primary" onclick="submitForm()" data-i18n="button.analyze">⚡ Analysieren &amp; Parsen</button>
+            </div>
 
-        <div class="response-section">
-          <h2 data-i18n="results.title">Ergebnis</h2>
-          <pre id="response" data-i18n="results.empty">Noch keine Analyse durchgeführt</pre>
+            <!-- PANEL: GOOGLE DRIVE -->
+            <div class="panel" id="panel-drive">
+                <div class="drive-browser">
+                    <div class="drive-subtabs">
+                        <button class="drive-subtab active" onclick="switchDriveTab('my')"   id="dtab-my">👤 <span data-i18n="drive.my">Mein Drive</span></button>
+                        <button class="drive-subtab"        onclick="switchDriveTab('team')" id="dtab-team">🏢 <span data-i18n="drive.team">Team-Ordner</span></button>
+                    </div>
+                    <div class="drive-toolbar">
+                        <div class="breadcrumb" id="breadcrumb">
+                            <span class="crumb active" onclick="navigateTo(null, this)">⌂ Root</span>
+                        </div>
+                        <input class="drive-search" type="text" placeholder="Suchen…" id="driveSearch" oninput="filterFiles(this.value)">
+                        <button class="drive-refresh" onclick="reloadDrive()" title="Aktualisieren">↻</button>
+                    </div>
+                    <div class="drive-list" id="driveList">
+                        <div class="drive-state">
+                            <div class="drive-state-icon">☁️</div>
+                            <p data-i18n="drive.connect">Drive verbinden</p>
+                            <small data-i18n="drive.connect.sub">Klicke auf ↻ um Dateien zu laden</small>
+                        </div>
+                    </div>
+                    <div class="drive-selected-bar" id="driveSelectedBar">
+                        <span>✓</span>
+                        <span class="dsb-name" id="driveSelectedName">–</span>
+                        <button class="dsb-clear" onclick="clearDriveSelection()">✕</button>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="submitDrive()" data-i18n="button.analyze.drive">⚡ Aus Drive analysieren</button>
+            </div>
+
+            <!-- PANEL: AUDIO -->
+            <div class="panel" id="panel-audio">
+                <div class="drop-zone">
+                    <input type="file" id="audioFile" accept=".mp3,.mp4,.mpeg,.mpga,.m4a,.wav,.webm" onchange="onFileSelected(this,'audio')">
+                    <span class="dz-icon">🎤</span>
+                    <div class="dz-title" data-i18n="upload.audio">Audio/Video hochladen</div>
+                    <div class="dz-sub"   data-i18n="upload.audio.sub">Meeting-Aufzeichnung transkribieren &amp; analysieren</div>
+                    <div class="dz-formats">
+                        <span class="fmt-badge">MP3</span><span class="fmt-badge">MP4</span>
+                        <span class="fmt-badge">WAV</span><span class="fmt-badge">M4A</span>
+                        <span class="fmt-badge">WebM</span>
+                        <span class="fmt-badge" style="color:var(--text-3)">max 25MB</span>
+                    </div>
+                </div>
+                <div class="file-chip" id="audioChip">
+                    <span>🎤</span>
+                    <span class="file-chip-name" id="audioChipName">–</span>
+                    <span class="file-chip-size" id="audioChipSize">–</span>
+                    <button class="file-chip-rm" onclick="clearFile('audio')">✕</button>
+                </div>
+                <div class="lang-row">
+                    <label data-i18n="upload.language">🌐 SPRACHE</label>
+                    <select id="whisperLang">
+                        <option value="de" data-i18n="lang.german">Deutsch</option>
+                        <option value="en" data-i18n="lang.english">Englisch</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="transcribeAndAnalyze()" data-i18n="button.transcribe">🎤 Transkribieren &amp; Analysieren</button>
+            </div>
+
+            <!-- SPINNER -->
+            <div id="spinner">
+                <div class="drive-spin"></div>
+                <span data-i18n="processing">Wird verarbeitet…</span>
+            </div>
+
+            <!-- CALENDAR -->
+            <div class="cal-section hidden" id="calSection">
+                <div class="cal-label" data-i18n="calendar.title">📅 Kalender &amp; Aufgaben</div>
+                <div class="cal-buttons">
+                    <button class="cal-btn cal-personal" onclick="addToMyCalendar()">📝 <span data-i18n="calendar.personal">Nur mein Kalender</span></button>
+                    <button class="cal-btn cal-invite"   onclick="addWithInvitations()">📧 <span data-i18n="calendar.invite">Mit Einladungen</span></button>
+                    <button class="cal-btn cal-jira"     onclick="createJiraTasks()">📋 <span data-i18n="calendar.jira">Jira Tasks</span></button>
+                </div>
+            </div>
+
+            <!-- RESULT -->
+            <div class="result-section">
+                <div class="result-header">
+                    <span class="result-label" data-i18n="results.title">Ergebnis</span>
+                    <span class="result-badge rb-empty" id="resultBadge">LEER</span>
+                </div>
+                <pre id="response" data-i18n="results.empty">Noch keine Analyse durchgeführt</pre>
+            </div>
+
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     const API_URL = 'http://localhost:8080';
-    
-    // ==================== MULTI-LANGUAGE SUPPORT (DE/EN) ====================
-    
+
+    // ── I18N ──
     const translations = {
-      de: {
-        'app.title': '📅 Meeting Parser',
-        'app.subtitle': 'Intelligente Meeting-Analyse für Ihr Team',
-        'login.welcome': 'Willkommen zurück',
-        'login.subtitle': 'Melden Sie sich mit Ihrem Google-Konto an',
-        'login.button': 'Mit Google anmelden',
-        'user.logout': 'Abmelden',
-        'upload.document': '📄 Meeting-Protokoll hochladen (PDF, DOCX, TXT)',
-        'upload.audio': '🎤 Meeting-Aufzeichnung hochladen (Audio/Video)',
-        'upload.audio.hint': 'Unterstützt: MP3, MP4, WAV, M4A, WebM (max. 25MB)',
-        'upload.divider': 'ODER',
-        'upload.language': '🌐 Sprache',
-        'button.analyze': 'Analysieren & Parsen',
-        'button.transcribe': '🎤 Transkribieren & Analysieren',
-        'calendar.title': '📅 Events zum Kalender hinzufügen',
-        'calendar.personal': '📝 Nur zu meinem Kalender',
-        'calendar.invite': '📧 Mit Einladungen senden',
-        'calendar.jira': '📋 Jira Tasks erstellen',
-        'results.title': 'Ergebnis',
-        'results.empty': 'Noch keine Analyse durchgeführt',
-        'processing': 'Wird verarbeitet...',
-        'lang.german': 'Deutsch',
-        'lang.english': 'Englisch'
-      },
-      en: {
-        'app.title': '📅 Meeting Parser',
-        'app.subtitle': 'Intelligent Meeting Analysis for Your Team',
-        'login.welcome': 'Welcome Back',
-        'login.subtitle': 'Sign in with your Google Account',
-        'login.button': 'Sign in with Google',
-        'user.logout': 'Logout',
-        'upload.document': '📄 Upload Meeting Protocol (PDF, DOCX, TXT)',
-        'upload.audio': '🎤 Upload Meeting Recording (Audio/Video)',
-        'upload.audio.hint': 'Supported: MP3, MP4, WAV, M4A, WebM (max. 25MB)',
-        'upload.divider': 'OR',
-        'upload.language': '🌐 Language',
-        'button.analyze': 'Analyze & Parse',
-        'button.transcribe': '🎤 Transcribe & Analyze',
-        'calendar.title': '📅 Add Events to Calendar',
-        'calendar.personal': '📝 Add to My Calendar Only',
-        'calendar.invite': '📧 Send with Invitations',
-        'calendar.jira': '📋 Create Jira Tasks',
-        'results.title': 'Results',
-        'results.empty': 'No analysis performed yet',
-        'processing': 'Processing...',
-        'lang.german': 'German',
-        'lang.english': 'English'
-      }
+        de: {
+            'app.title':'Meeting Parser','login.button':'Mit Google anmelden','user.logout':'Abmelden',
+            'tab.document':'📄 Protokoll','tab.drive':'☁️ Google Drive','tab.audio':'🎤 Audio/Video',
+            'upload.drop':'Datei hier ablegen oder klicken','upload.doc.sub':'Meeting-Protokoll hochladen',
+            'upload.audio':'Audio/Video hochladen','upload.audio.sub':'Meeting-Aufzeichnung transkribieren & analysieren',
+            'upload.language':'🌐 SPRACHE','drive.my':'Mein Drive','drive.team':'Team-Ordner',
+            'drive.connect':'Drive verbinden','drive.connect.sub':'Klicke auf ↻ um Dateien zu laden',
+            'button.analyze':'⚡ Analysieren & Parsen','button.analyze.drive':'⚡ Aus Drive analysieren',
+            'button.transcribe':'🎤 Transkribieren & Analysieren','calendar.title':'📅 Kalender & Aufgaben',
+            'calendar.personal':'Nur mein Kalender','calendar.invite':'Mit Einladungen','calendar.jira':'Jira Tasks',
+            'results.title':'Ergebnis','results.empty':'Noch keine Analyse durchgeführt',
+            'processing':'Wird verarbeitet…','lang.german':'Deutsch','lang.english':'Englisch'
+        },
+        en: {
+            'app.title':'Meeting Parser','login.button':'Sign in with Google','user.logout':'Logout',
+            'tab.document':'📄 Protocol','tab.drive':'☁️ Google Drive','tab.audio':'🎤 Audio/Video',
+            'upload.drop':'Drop file here or click','upload.doc.sub':'Upload meeting protocol',
+            'upload.audio':'Upload Audio/Video','upload.audio.sub':'Transcribe & analyze meeting recording',
+            'upload.language':'🌐 LANGUAGE','drive.my':'My Drive','drive.team':'Team Folder',
+            'drive.connect':'Connect Drive','drive.connect.sub':'Click ↻ to load files',
+            'button.analyze':'⚡ Analyze & Parse','button.analyze.drive':'⚡ Analyze from Drive',
+            'button.transcribe':'🎤 Transcribe & Analyze','calendar.title':'📅 Calendar & Tasks',
+            'calendar.personal':'My Calendar Only','calendar.invite':'Send Invitations','calendar.jira':'Jira Tasks',
+            'results.title':'Result','results.empty':'No analysis performed yet',
+            'processing':'Processing…','lang.german':'German','lang.english':'English'
+        }
     };
-    
-    let currentLanguage = localStorage.getItem('appLanguage') || 'de';
-    
-    function t(key) {
-      return translations[currentLanguage][key] || key;
+
+    let lang = localStorage.getItem('appLang') || 'de';
+    function t(k) { return translations[lang][k] || k; }
+    function applyLang() {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+        document.querySelectorAll('.btn-sm:not(.danger)').forEach(b => { b.textContent = lang==='de'?'🇩🇪 DE':'🇺🇸 EN'; });
     }
-    
-    function updateLanguage(lang) {
-      currentLanguage = lang;
-      localStorage.setItem('appLanguage', lang);
-      document.documentElement.lang = lang;
-      
-      // Update all elements with data-i18n
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        const text = t(key);
-        
-        if (el.tagName === 'INPUT' && el.placeholder !== undefined) {
-          el.placeholder = text;
-        } else if (el.tagName === 'OPTION') {
-          el.textContent = text;
-        } else {
-          el.textContent = text;
-        }
-      });
-      
-      // Update language buttons
-      updateLanguageButtons();
-    }
-    
-    function updateLanguageButtons() {
-      const btns = document.querySelectorAll('.lang-btn');
-      btns.forEach(btn => {
-        btn.textContent = currentLanguage === 'de' ? '🇩🇪 DE' : '🇺🇸 EN';
-      });
-    }
-    
-    function toggleLanguage() {
-      updateLanguage(currentLanguage === 'de' ? 'en' : 'de');
-    }
-    
-    // Apply language on load
-    document.addEventListener('DOMContentLoaded', () => {
-      updateLanguage(currentLanguage);
-    });
+    function toggleLanguage() { lang = lang==='de'?'en':'de'; localStorage.setItem('appLang',lang); applyLang(); }
+    document.addEventListener('DOMContentLoaded', applyLang);
+
+    // ── STATE ──
     let resultsData = null;
-    let currentUserEmail = null;
+    let driveTab = 'my';
+    let currentFolderId = null;
+    let driveFiles = [];
+    let selectedDriveFile = null;
+    let breadcrumbs = [];
 
-    // ==================== AUTH FUNCTIONS ====================
-
+    // ── AUTH ──
     async function checkAuth() {
-      try {
-        const response = await fetch(`${API_URL}/me`, {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const user = await response.json();
-          currentUserEmail = user.email;
-          showApp(user);
-        } else {
-          showLogin();
-        }
-      } catch (err) {
-        showLogin();
-      }
+        try {
+            const r = await fetch(`${API_URL}/me`, { credentials:'include' });
+            if (r.ok) showApp(await r.json()); else showLogin();
+        } catch { showLogin(); }
     }
 
     async function handleGoogleSignIn() {
-      try {
-        const response = await fetch(`${API_URL}/auth/google`, {
-          credentials: 'include'
-        });
-        
-        if (!response.ok) throw new Error(`Server error: ${response.status}`);
-        
-        const data = await response.json();
-        
-        const width = 500, height = 600;
-        const left = (screen.width - width) / 2;
-        const top = (screen.height - height) / 2;
-        
-        const popup = window.open(
-          data.auth_url,
-          'Google Sign In',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
-        
-        if (!popup) {
-          alert('Popup wurde blockiert! Bitte erlauben Sie Popups für diese Seite.');
-          return;
-        }
-        
-        window.addEventListener('message', async (event) => {
-          if (event.data === 'login_success') {
-            if (popup && !popup.closed) popup.close();
-            
-            const userResponse = await fetch(`${API_URL}/me`, {
-              credentials: 'include'
+        try {
+            const r = await fetch(`${API_URL}/auth/google`, { credentials:'include' });
+            if (!r.ok) throw new Error(`Server error: ${r.status}`);
+            const { auth_url } = await r.json();
+            const w=500,h=600;
+            const popup = window.open(auth_url,'Google Sign In',`width=${w},height=${h},left=${(screen.width-w)/2},top=${(screen.height-h)/2}`);
+            if (!popup) { alert('Popup blockiert!'); return; }
+            window.addEventListener('message', async (e) => {
+                if (e.data==='login_success') { popup.close(); const ur=await fetch(`${API_URL}/me`,{credentials:'include'}); showApp(await ur.json()); }
             });
-            const user = await userResponse.json();
-            currentUserEmail = user.email;
-            showApp(user);
-          }
-        });
-        
-      } catch (err) {
-        alert('Anmeldefehler: ' + err.message);
-      }
+        } catch(e) { alert('Anmeldefehler: '+e.message); }
     }
 
     async function handleLogout() {
-      try {
-        await fetch(`${API_URL}/auth/logout`, {
-          method: 'POST',
-          credentials: 'include'
-        });
+        await fetch(`${API_URL}/auth/logout`,{method:'POST',credentials:'include'}).catch(()=>{});
         location.reload();
-      } catch (err) {
-        alert('Abmeldefehler: ' + err.message);
-      }
     }
 
-    function showLogin() {
-      document.getElementById('loginSection').classList.remove('hidden');
-      document.getElementById('appSection').classList.add('hidden');
-    }
+    function showLogin() { document.getElementById('loginSection').classList.remove('hidden'); document.getElementById('appSection').classList.add('hidden'); }
 
     function showApp(user) {
-      document.getElementById('loginSection').classList.add('hidden');
-      document.getElementById('appSection').classList.remove('hidden');
-      document.getElementById('userName').textContent = user.name || user.email;
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('appSection').classList.remove('hidden');
+        document.getElementById('userName').textContent = user.name || user.email;
+        const initials = (user.name||user.email||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
     }
 
-    // ==================== FILE UPLOAD & PARSE ====================
+    // ── TABS ──
+    function switchSourceTab(tab) {
+        document.querySelectorAll('.source-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tab-'+tab).classList.add('active');
+        document.getElementById('panel-'+tab).classList.add('active');
+        if (tab==='drive' && driveFiles.length===0) loadDriveFiles();
+    }
 
+    function switchDriveTab(tab) {
+        driveTab = tab;
+        document.querySelectorAll('.drive-subtab').forEach(t=>t.classList.remove('active'));
+        document.getElementById('dtab-'+tab).classList.add('active');
+        currentFolderId = null; breadcrumbs = [];
+        clearDriveSelection(); renderBreadcrumb(); loadDriveFiles();
+    }
+
+    // ── LOCAL FILE ──
+    function onFileSelected(input, type) {
+        const file = input.files[0]; if (!file) return;
+        const chip = document.getElementById(type==='doc'?'docChip':'audioChip');
+        document.getElementById(type==='doc'?'docChipName':'audioChipName').textContent = file.name;
+        document.getElementById(type==='doc'?'docChipSize':'audioChipSize').textContent = (file.size/1024/1024).toFixed(1)+' MB';
+        chip.classList.add('show');
+    }
+    function clearFile(type) {
+        document.getElementById(type==='doc'?'file':'audioFile').value='';
+        document.getElementById(type==='doc'?'docChip':'audioChip').classList.remove('show');
+    }
+
+    // ── DRIVE BROWSER ──
+    async function loadDriveFiles() {
+        const list = document.getElementById('driveList');
+        list.innerHTML = `<div class="drive-state"><div class="drive-spin"></div><p>${lang==='de'?'Lade Dateien…':'Loading files…'}</p></div>`;
+        try {
+            const params = currentFolderId ? `?folder_id=${currentFolderId}` : '';
+            const endpoint = driveTab==='team' ? `/drive/team-folder${params}` : `/drive/files${params}`;
+            const r = await fetch(`${API_URL}${endpoint}`, { credentials:'include' });
+            if (!r.ok) { const e=await r.json(); list.innerHTML=`<div class="drive-state"><div class="drive-state-icon">⚠️</div><p>${e.error||'Fehler'}</p></div>`; return; }
+            const data = await r.json();
+            driveFiles = data.files || [];
+            renderDriveFiles(driveFiles);
+        } catch(e) {
+            list.innerHTML=`<div class="drive-state"><div class="drive-state-icon">❌</div><p>${e.message}</p></div>`;
+        }
+    }
+
+    function renderDriveFiles(files) {
+        const list = document.getElementById('driveList');
+        if (!files.length) {
+            list.innerHTML=`<div class="drive-state"><div class="drive-state-icon">📂</div><p>${lang==='de'?'Ordner ist leer':'Folder is empty'}</p></div>`;
+            return;
+        }
+        list.innerHTML = files.map(f => {
+            const icon  = f.isFolder?'📁':f.type==='pdf'?'📄':f.type==='docx'?'📝':'📃';
+            const badge = f.isFolder?'dir':f.type;
+            const label = f.isFolder?'DIR':f.type.toUpperCase();
+            const meta  = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString(lang) : '–';
+            const size  = f.size ? (f.size/1024/1024).toFixed(2)+' MB' : '';
+            const sel   = selectedDriveFile&&selectedDriveFile.id===f.id?'selected':'';
+            return `<div class="drive-item ${sel}" onclick="onDriveItemClick('${f.id}','${escHtml(f.name)}',${f.isFolder})" data-id="${f.id}">
+      <span class="di-icon">${icon}</span>
+      <div class="di-info">
+        <div class="di-name">${escHtml(f.name)}</div>
+        <div class="di-meta">${meta}${size?' · '+size:''}</div>
+      </div>
+      <span class="di-badge badge-${badge}">${label}</span>
+      ${f.isFolder?'<span class="di-arrow">›</span>':''}
+    </div>`;
+        }).join('');
+    }
+
+    function onDriveItemClick(id, name, isFolder) {
+        if (isFolder) {
+            breadcrumbs.push({ id: currentFolderId, name: document.querySelector('.crumb.active')?.textContent||'Root' });
+            currentFolderId = id;
+            renderBreadcrumb(name); clearDriveSelection(); loadDriveFiles();
+        } else { selectDriveFile(id, name); }
+    }
+
+    function selectDriveFile(id, name) {
+        selectedDriveFile = { id, name };
+        document.querySelectorAll('.drive-item').forEach(el => el.classList.toggle('selected', el.dataset.id===id));
+        document.getElementById('driveSelectedName').textContent = name;
+        document.getElementById('driveSelectedBar').classList.add('show');
+    }
+
+    function clearDriveSelection() {
+        selectedDriveFile = null;
+        document.querySelectorAll('.drive-item').forEach(el => el.classList.remove('selected'));
+        document.getElementById('driveSelectedBar').classList.remove('show');
+    }
+
+    function navigateTo(folderId, el) {
+        if (el.classList.contains('active')) return;
+        currentFolderId = folderId;
+        if (!folderId) breadcrumbs = [];
+        clearDriveSelection(); renderBreadcrumb(); loadDriveFiles();
+    }
+
+    function renderBreadcrumb(currentName) {
+        const bc = document.getElementById('breadcrumb');
+        const root = driveTab==='team'?'🏢 Team':'⌂ Root';
+        let html = `<span class="crumb ${!currentFolderId?'active':''}" onclick="navigateTo(null,this)">${root}</span>`;
+        breadcrumbs.forEach(b => {
+            if (b.id) html += `<span class="crumb-sep">›</span><span class="crumb" onclick="navigateTo('${b.id}',this)">${escHtml(b.name)}</span>`;
+        });
+        if (currentName && currentFolderId) html += `<span class="crumb-sep">›</span><span class="crumb active">${escHtml(currentName)}</span>`;
+        bc.innerHTML = html;
+    }
+
+    function filterFiles(q) {
+        if (!q) { renderDriveFiles(driveFiles); return; }
+        renderDriveFiles(driveFiles.filter(f => f.name.toLowerCase().includes(q.toLowerCase())));
+    }
+
+    function reloadDrive() { loadDriveFiles(); }
+
+    // ── PARSE LOCAL ──
     async function submitForm() {
-      const fileInput = document.getElementById('file');
-      const responseEl = document.getElementById('response');
-      const spinner = document.getElementById('spinner');
-
-      if (!fileInput.files.length) {
-        responseEl.textContent = '⚠️ Bitte eine Datei hochladen.';
-        return;
-      }
-
-      responseEl.textContent = '';
-      spinner.style.display = 'block';
-      hideCalendarButtons();
-
-      try {
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-
-        const response = await fetch(`${API_URL}/parse`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            alert('Sitzung abgelaufen. Bitte melden Sie sich erneut an.');
-            location.reload();
-            return;
-          }
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        resultsData = data;
-        responseEl.textContent = JSON.stringify(data, null, 2);
-        
-        // Show calendar buttons
-        showCalendarButtons();
-        
-        fileInput.value = '';
-        
-        console.log('✅ Parse successful:', data);
-        
-      } catch (err) {
-        responseEl.textContent = '❌ Fehler: ' + err.message;
-      } finally {
-        spinner.style.display = 'none';
-      }
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files.length) { setResult('⚠️ '+(lang==='de'?'Bitte Datei auswählen.':'Please select a file.'),'error'); return; }
+        setSpinner(true); hideCalendar();
+        try {
+            const fd = new FormData(); fd.append('file', fileInput.files[0]);
+            const r = await fetch(`${API_URL}/parse`,{method:'POST',body:fd,credentials:'include'});
+            if (r.status===401) { alert(lang==='de'?'Sitzung abgelaufen.':'Session expired.'); location.reload(); return; }
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const data = await r.json();
+            resultsData = data; setResult(JSON.stringify(data,null,2),'ok'); showCalendar();
+            fileInput.value=''; document.getElementById('docChip').classList.remove('show');
+        } catch(e) { setResult('❌ '+e.message,'error'); }
+        finally { setSpinner(false); }
     }
 
-    // ==================== TRANSCRIPTION FUNCTION ====================
-    
-    async function transcribeAndAnalyze() {
-      const audioInput = document.getElementById('audioFile');
-      const responseEl = document.getElementById('response');
-      const spinner = document.getElementById('spinner');
-      const langSelect = document.getElementById('whisperLang');
-
-      if (!audioInput.files.length) {
-        const msg = currentLanguage === 'de' 
-          ? '⚠️ Bitte eine Audio-/Videodatei hochladen.'
-          : '⚠️ Please upload an audio/video file.';
-        responseEl.textContent = msg;
-        return;
-      }
-
-      const file = audioInput.files[0];
-      const fileSizeMB = file.size / 1024 / 1024;
-      
-      if (fileSizeMB > 25) {
-        const msg = currentLanguage === 'de'
-          ? `❌ Datei zu groß (${fileSizeMB.toFixed(1)}MB). Maximum: 25MB`
-          : `❌ File too large (${fileSizeMB.toFixed(1)}MB). Maximum: 25MB`;
-        responseEl.textContent = msg;
-        return;
-      }
-
-      const processingMsg = currentLanguage === 'de'
-        ? '🎤 Transkribiere Audio... Dies kann einige Minuten dauern.'
-        : '🎤 Transcribing audio... This may take a few minutes.';
-      responseEl.textContent = processingMsg;
-      spinner.style.display = 'block';
-      hideCalendarButtons();
-
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('language', langSelect.value); // Use selected language
-        formData.append('analyze', 'true'); // Automatically analyze after transcription
-
-        const response = await fetch(`${API_URL}/transcribe`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            const msg = currentLanguage === 'de'
-              ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
-              : 'Session expired. Please log in again.';
-            alert(msg);
-            location.reload();
-            return;
-          }
-          if (response.status === 503) {
-            const errorData = await response.json();
-            responseEl.textContent = `❌ ${errorData.error}`;
-            return;
-          }
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Check if we have events (analyzed) or just transcript
-        if (data.events) {
-          resultsData = data.events;
-          const successMsg = currentLanguage === 'de'
-            ? `✅ Transkription erfolgreich!\n\n📝 Transkript:\n${data.transcript}\n\n📊 Analysierte Events:\n${JSON.stringify(data.events, null, 2)}`
-            : `✅ Transcription successful!\n\n📝 Transcript:\n${data.transcript}\n\n📊 Analyzed Events:\n${JSON.stringify(data.events, null, 2)}`;
-          responseEl.textContent = successMsg;
-          showCalendarButtons();
-        } else {
-          const warningMsg = currentLanguage === 'de'
-            ? `✅ Transkription erfolgreich!\n\n📝 Transkript:\n${data.transcript}\n\n⚠️ ${data.error || 'Keine Events gefunden'}`
-            : `✅ Transcription successful!\n\n📝 Transcript:\n${data.transcript}\n\n⚠️ ${data.error || 'No events found'}`;
-          responseEl.textContent = warningMsg;
-        }
-        
-        audioInput.value = '';
-        
-        console.log('✅ Transcription successful:', data);
-        
-      } catch (err) {
-        const errorMsg = currentLanguage === 'de'
-          ? '❌ Transkriptionsfehler: '
-          : '❌ Transcription error: ';
-        responseEl.textContent = errorMsg + err.message;
-        console.error('Transcription error:', err);
-      } finally {
-        spinner.style.display = 'none';
-      }
-    }
-
-    // ==================== CALENDAR FUNCTIONS ====================
-
-    // Function 1: Add to personal calendar only (no invitations)
-    async function addToMyCalendar() {
-      if (!resultsData) {
-        alert('❌ Keine Events zum Hinzufügen');
-        return;
-      }
-      
-      console.log('📅 Füge Events zu persönlichem Kalender hinzu...');
-      
-      try {
-        const response = await fetch(`${API_URL}/calendar/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ 
-            events: resultsData,
-            sendInvitations: false  // KEY: No invitations
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          console.log('✅ Kalender-Antwort:', data);
-          
-          let message = `✅ Erfolgreich ${data.created_count} Event(s) erstellt!`;
-          
-          if (data.personal_tasks > 0) {
-            message += `\n\n📝 ${data.personal_tasks} persönliche Aufgabe(n) hinzugefügt.`;
-          }
-          
-          message += '\n\n✓ Keine Einladungen wurden versendet.';
-          
-          alert(message);
-        } else {
-          console.error('❌ Fehler:', data);
-          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
-        }
-      } catch (err) {
-        console.error('❌ Anfrage fehlgeschlagen:', err);
-        alert('❌ Fehler beim Hinzufügen: ' + err.message);
-      }
-    }
-
-    // Function 2: Add with invitations (delegates to others)
-    async function addWithInvitations() {
-      if (!resultsData) {
-        alert('❌ Keine Events zum Hinzufügen');
-        return;
-      }
-      
-      console.log('📧 Füge Events mit Einladungen hinzu...');
-      
-      try {
-        // First, get preview of what will be sent
-        const previewResponse = await fetch(`${API_URL}/calendar/preview`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ events: resultsData })
-        });
-        
-        const preview = await previewResponse.json();
-        
-        console.log('📊 Vorschau:', preview);
-        
-        // Build confirmation message
-        let confirmMessage = `Sie sind dabei, ${preview.total_events} Kalender-Event(s) zu erstellen:\n\n`;
-        
-        if (preview.tasks_for_self > 0) {
-          confirmMessage += `📝 ${preview.tasks_for_self} Aufgabe(n) für Sie selbst\n`;
-        }
-        
-        if (preview.tasks_for_others > 0) {
-          confirmMessage += `📧 ${preview.tasks_for_others} Aufgabe(n) für andere Personen\n\n`;
-          confirmMessage += `E-Mail-Einladungen werden VON IHNEN gesendet:\n`;
-          confirmMessage += `"${preview.organizer_name || preview.organizer} hat Sie eingeladen..."\n\n`;
-          
-          // Show who will receive invitations
-          if (preview.details && preview.details.others) {
-            confirmMessage += `Empfänger:\n`;
-            preview.details.others.forEach(task => {
-              confirmMessage += `  • ${task.assignee} (${task.email})\n`;
+    // ── PARSE DRIVE ──
+    async function submitDrive() {
+        if (!selectedDriveFile) { setResult('⚠️ '+(lang==='de'?'Bitte Datei aus Drive auswählen.':'Please select a Drive file.'),'error'); return; }
+        setSpinner(true); hideCalendar();
+        try {
+            const r = await fetch(`${API_URL}/drive/parse`,{
+                method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                body: JSON.stringify({file_id:selectedDriveFile.id, file_name:selectedDriveFile.name})
             });
-          }
-        }
-        
-        if (preview.tasks_without_email > 0) {
-          confirmMessage += `\n⚠️ ${preview.tasks_without_email} Aufgabe(n) ohne E-Mail-Adresse\n`;
-          confirmMessage += `(Diese werden als persönliche Erinnerungen hinzugefügt)\n`;
-        }
-        
-        confirmMessage += '\n\nFortfahren?';
-        
-        // Show confirmation dialog
-        if (!confirm(confirmMessage)) {
-          console.log('❌ Benutzer hat abgebrochen');
-          return;
-        }
-        
-        // User confirmed - proceed with creation
-        const response = await fetch(`${API_URL}/calendar/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ 
-            events: resultsData,
-            sendInvitations: true  // KEY: Send invitations
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          console.log('✅ Kalender-Antwort:', data);
-          
-          let message = `✅ Erfolgreich ${data.created_count} Event(s) erstellt!`;
-          
-          if (data.personal_tasks > 0) {
-            message += `\n\n📝 ${data.personal_tasks} persönliche Aufgabe(n)`;
-          }
-          
-          if (data.invitations_sent > 0) {
-            message += `\n\n📧 ${data.invitations_sent} E-Mail-Einladung(en) versendet`;
-            message += '\n\nEmpfänger erhalten Google Kalender-Einladungen von Ihnen.';
-          }
-          
-          alert(message);
-        } else {
-          console.error('❌ Fehler:', data);
-          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
-        }
-        
-      } catch (err) {
-        console.error('❌ Anfrage fehlgeschlagen:', err);
-        alert('❌ Fehler beim Hinzufügen: ' + err.message);
-      }
+            if (r.status===401) { alert(lang==='de'?'Sitzung abgelaufen.':'Session expired.'); location.reload(); return; }
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const data = await r.json();
+            resultsData = data; setResult(JSON.stringify(data,null,2),'ok'); showCalendar();
+        } catch(e) { setResult('❌ '+e.message,'error'); }
+        finally { setSpinner(false); }
     }
 
-    // Function 3: Show/hide calendar buttons
-    function showCalendarButtons() {
-      const container = document.getElementById('calendarButtonsContainer');
-      if (container) {
-        container.classList.remove('hidden');
-      }
+    // ── TRANSCRIBE ──
+    async function transcribeAndAnalyze() {
+        const audioInput = document.getElementById('audioFile');
+        if (!audioInput.files.length) { setResult('⚠️ '+(lang==='de'?'Bitte Audio-Datei auswählen.':'Please select an audio file.'),'error'); return; }
+        const file = audioInput.files[0];
+        if (file.size/1024/1024 > 25) { setResult(`❌ ${lang==='de'?'Datei zu groß':'File too large'} (${(file.size/1024/1024).toFixed(1)}MB). Max: 25MB`,'error'); return; }
+        setSpinner(true); hideCalendar();
+        try {
+            const fd = new FormData(); fd.append('file',file); fd.append('language',document.getElementById('whisperLang').value); fd.append('analyze','true');
+            const r = await fetch(`${API_URL}/transcribe`,{method:'POST',body:fd,credentials:'include'});
+            if (r.status===401) { alert(lang==='de'?'Sitzung abgelaufen.':'Session expired.'); location.reload(); return; }
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const data = await r.json();
+            if (data.events) {
+                resultsData=data.events;
+                setResult((lang==='de'?'✅ Transkription erfolgreich!\n\n📝 Transkript:\n':'✅ Transcription successful!\n\n📝 Transcript:\n')+data.transcript+'\n\n📊 Events:\n'+JSON.stringify(data.events,null,2),'ok');
+                showCalendar();
+            } else {
+                setResult((lang==='de'?'✅ Transkript:\n':'✅ Transcript:\n')+data.transcript+'\n\n⚠️ '+(data.error||'No events found'),'ok');
+            }
+            audioInput.value=''; document.getElementById('audioChip').classList.remove('show');
+        } catch(e) { setResult('❌ '+e.message,'error'); }
+        finally { setSpinner(false); }
     }
 
-    function hideCalendarButtons() {
-      const container = document.getElementById('calendarButtonsContainer');
-      if (container) {
-        container.classList.add('hidden');
-      }
+    // ── CALENDAR / JIRA ──
+    async function addToMyCalendar() {
+        if (!resultsData) { alert('❌ Keine Events'); return; }
+        try {
+            const r = await fetch(`${API_URL}/calendar/add`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({events:resultsData,sendInvitations:false})});
+            const d = await r.json();
+            if (r.ok) alert(`✅ ${d.created_count} Event(s) erstellt!\n✓ Keine Einladungen versendet.`);
+            else alert('❌ '+(d.error||'Fehler'));
+        } catch(e) { alert('❌ '+e.message); }
     }
 
-    // ==================== JIRA INTEGRATION ====================
+    async function addWithInvitations() {
+        if (!resultsData) { alert('❌ Keine Events'); return; }
+        try {
+            const pr = await fetch(`${API_URL}/calendar/preview`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({events:resultsData})});
+            const preview = await pr.json();
+            let msg = `${preview.total_events} Event(s) erstellen?`;
+            if (preview.tasks_for_others>0) msg+=`\n📧 ${preview.tasks_for_others} Einladung(en) werden versendet.`;
+            if (!confirm(msg+'\n\nFortfahren?')) return;
+            const r = await fetch(`${API_URL}/calendar/add`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({events:resultsData,sendInvitations:true})});
+            const d = await r.json();
+            if (r.ok) alert(`✅ ${d.created_count} Event(s) erstellt!\n📧 ${d.invitations_sent||0} Einladung(en) versendet.`);
+            else alert('❌ '+(d.error||'Fehler'));
+        } catch(e) { alert('❌ '+e.message); }
+    }
 
     async function createJiraTasks() {
-      if (!resultsData) {
-        alert('❌ Keine Events zum Hinzufügen');
-        return;
-      }
-      
-      console.log('📋 Erstelle Jira Tasks...');
-      
-      try {
-        // First check if Jira is configured
-        const statusResponse = await fetch(`${API_URL}/jira/status`, {
-          credentials: 'include'
-        });
-        
-        const statusData = await statusResponse.json();
-        
-        if (!statusData.configured) {
-          alert('⚠️ Jira ist nicht konfiguriert.\n\n' +
-                'Bitte kontaktieren Sie den Administrator, um Jira-Credentials in der .env Datei zu setzen:\n' +
-                '- JIRA_BASE_URL\n' +
-                '- JIRA_EMAIL\n' +
-                '- JIRA_API_TOKEN\n' +
-                '- JIRA_PROJECT_KEY');
-          return;
-        }
-        
-        // Get preview
-        const previewResponse = await fetch(`${API_URL}/jira/preview`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ events: resultsData })
-        });
-        
-        const preview = await previewResponse.json();
-        
-        console.log('📊 Vorschau:', preview);
-        
-        // Build confirmation message
-        let confirmMessage = `Sie sind dabei, ${preview.total_action_items} Jira Task(s) zu erstellen:\n\n`;
-        
-        if (preview.with_assignee > 0) {
-          confirmMessage += `✅ ${preview.with_assignee} Task(s) mit Assignee\n`;
-        }
-        
-        if (preview.without_assignee > 0) {
-          confirmMessage += `⚠️ ${preview.without_assignee} Task(s) ohne Assignee (werden als "Unassigned" erstellt)\n`;
-        }
-        
-        confirmMessage += '\n\nFortfahren?';
-        
-        // Show confirmation dialog
-        if (!confirm(confirmMessage)) {
-          console.log('❌ Benutzer hat abgebrochen');
-          return;
-        }
-        
-        // User confirmed - create Jira tasks
-        const response = await fetch(`${API_URL}/jira/create-tasks`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ events: resultsData })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          console.log('✅ Jira-Antwort:', data);
-          
-          let message = `✅ Erfolgreich ${data.created_count} Jira Issue(s) erstellt!\n\n`;
-          
-          if (data.created_count > 0) {
-            message += 'Erstelle Issues:\n';
-            data.issues.slice(0, 5).forEach(issue => {
-              message += `• ${issue.jira_key}: ${issue.task.substring(0, 50)}...\n`;
-            });
-            
-            if (data.created_count > 5) {
-              message += `\n... und ${data.created_count - 5} weitere`;
-            }
-          }
-          
-          if (data.failed_count > 0) {
-            message += `\n\n❌ ${data.failed_count} Task(s) konnten nicht erstellt werden`;
-          }
-          
-          alert(message);
-        } else {
-          console.error('❌ Fehler:', data);
-          alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
-        }
-        
-      } catch (err) {
-        console.error('❌ Anfrage fehlgeschlagen:', err);
-        alert('❌ Fehler beim Erstellen der Jira Tasks: ' + err.message);
-      }
+        if (!resultsData) { alert('❌ Keine Events'); return; }
+        try {
+            const st = await fetch(`${API_URL}/jira/status`,{credentials:'include'});
+            const sd = await st.json();
+            if (!sd.configured) { alert('⚠️ Jira nicht konfiguriert.\nBitte JIRA_* Variablen in .env setzen.'); return; }
+            const pr = await fetch(`${API_URL}/jira/preview`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({events:resultsData})});
+            const preview = await pr.json();
+            if (!confirm(`${preview.total_action_items} Jira Task(s) erstellen?\n\nFortfahren?`)) return;
+            const r = await fetch(`${API_URL}/jira/create-tasks`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({events:resultsData})});
+            const d = await r.json();
+            if (r.ok) alert(`✅ ${d.created_count} Jira Issue(s) erstellt!`);
+            else alert('❌ '+(d.error||'Fehler'));
+        } catch(e) { alert('❌ '+e.message); }
     }
 
-    // ==================== INITIALIZE ====================
-    
-    checkAuth();
-  </script>
+    // ── HELPERS ──
+    function setSpinner(on) { document.getElementById('spinner').classList.toggle('show',on); }
+    function showCalendar()  { document.getElementById('calSection').classList.remove('hidden'); }
+    function hideCalendar()  { document.getElementById('calSection').classList.add('hidden'); }
+    function setResult(text, state) {
+        document.getElementById('response').textContent = text;
+        const b = document.getElementById('resultBadge');
+        b.className = 'result-badge';
+        if (state==='ok')    { b.classList.add('rb-ok');    b.textContent='OK'; }
+        if (state==='error') { b.classList.add('rb-error'); b.textContent='ERROR'; }
+        if (!state)          { b.classList.add('rb-empty'); b.textContent=lang==='de'?'LEER':'EMPTY'; }
+    }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+    checkAuth();
+</script>
 </body>
 </html>
