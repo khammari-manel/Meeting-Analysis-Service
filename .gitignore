@@ -9,3 +9,6 @@ venv/
 *.pyc
 .pytest_cache/
 .vscode/
+.node_modules/
+dist/
+build/
