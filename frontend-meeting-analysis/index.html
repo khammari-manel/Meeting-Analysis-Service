@@ -432,10 +432,6 @@
             <!-- PANEL: GOOGLE DRIVE -->
             <div class="panel" id="panel-drive">
                 <div class="drive-browser">
-                    <div class="drive-subtabs">
-                        <button class="drive-subtab active" onclick="switchDriveTab('my')"   id="dtab-my">👤 <span data-i18n="drive.my">Mein Drive</span></button>
-                        <button class="drive-subtab"        onclick="switchDriveTab('team')" id="dtab-team">🏢 <span data-i18n="drive.team">Team-Ordner</span></button>
-                    </div>
                     <div class="drive-toolbar">
                         <div class="breadcrumb" id="breadcrumb">
                             <span class="crumb active" onclick="navigateTo(null, this)">⌂ Root</span>
@@ -563,7 +559,7 @@
 
     // ── STATE ──
     let resultsData = null;
-    let driveTab = 'my';
+    let driveTab = 'team';
     let currentFolderId = null;
     let driveFiles = [];
     let selectedDriveFile = null;
@@ -613,6 +609,11 @@
         document.getElementById('tab-'+tab).classList.add('active');
         document.getElementById('panel-'+tab).classList.add('active');
         if (tab==='drive' && driveFiles.length===0) loadDriveFiles();
+        
+        // Clear previous results when switching tabs
+        resultsData = null;
+        setResult('', '');
+        hideCalendar();
     }
 
     function switchDriveTab(tab) {
