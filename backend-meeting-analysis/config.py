@@ -5,30 +5,33 @@ from datetime import timedelta
 
 class Config:
     """Application configuration"""
-    
+
     # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', secrets.token_hex(16))
     DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
-    
+
     # Database
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///meeting_analysis.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-    
+
     # Google OAuth
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
     REDIRECT_URI = 'http://localhost:8080/auth/google/callback'
-    
+
+    # Google Drive
+    TEAM_DRIVE_FOLDER_ID = os.getenv('TEAM_DRIVE_FOLDER_ID', '')  
+
     # AI
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
     MOCK_MODE = os.getenv('MOCK_MODE', 'false').lower() == 'true'
-    
+
     # RabbitMQ
     CLOUDAMQP_URL = os.getenv('CLOUDAMQP_URL')
-    
+
     # CORS
     CORS_ORIGINS = [
         "http://localhost:8080",
@@ -38,6 +41,6 @@ class Config:
         "http://localhost:3000",
         "file://"
     ]
-    
+
     # Server
     PORT = int(os.getenv('PORT', 8080))
