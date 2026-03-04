@@ -63,7 +63,7 @@ def team_folder():
         if not credentials:
             return jsonify({"error": "No Google credentials found. Please log in again."}), 401
 
-        team_folder_id = os.getenv('TEAM_DRIVE_FOLDER_ID')
+        team_folder_id = Config.TEAM_DRIVE_FOLDER_ID
         if not team_folder_id:
             return jsonify({
                 "error": "Team folder not configured.",
