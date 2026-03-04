@@ -6,6 +6,7 @@ import requests
 CLIENT_SECRET_FILE = 'client_secret.json'
 SCOPES = [
     'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/drive.readonly',
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
     'openid'
@@ -35,7 +36,7 @@ def exchange_code_for_credentials(code):
     )
     flow.fetch_token(code=code)
     credentials = flow.credentials
-    
+
     # Get user info from Google
     user_info_response = requests.get(
         'https://www.googleapis.com/oauth2/v2/userinfo',
@@ -43,5 +44,14 @@ def exchange_code_for_credentials(code):
     )
     user_info = user_info_response.json()
     print(f"✅ Got user info: {user_info.get('email')}")
-    
-    return credentials, user_info
+
+    credentials_dict = {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+    return credentials, user_info, credentials_dict
