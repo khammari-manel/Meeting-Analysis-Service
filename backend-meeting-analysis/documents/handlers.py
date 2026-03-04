@@ -53,10 +53,10 @@ def extract_text_from_file(file):
     """Main function to extract text from uploaded file."""
     if not file or file.filename == '':
         raise ValueError("No file selected")
-    
+
     filename = file.filename.lower()
     file_content = file.read()
-    
+
     if filename.endswith('.pdf'):
         return extract_text_from_pdf(file_content)
     elif filename.endswith('.docx'):
@@ -65,3 +65,21 @@ def extract_text_from_file(file):
         return extract_text_from_txt(file_content)
     else:
         raise ValueError("Unsupported file type. Use PDF, DOCX, or TXT")
+
+
+# Google Drive (accepts bytes instead of file-object)
+def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
+    """
+    Extract text from raw bytes based on filename extension.
+    Used by Drive integration to parse files downloaded from Google Drive.
+    """
+    filename_lower = filename.lower()
+
+    if filename_lower.endswith('.pdf'):
+        return extract_text_from_pdf(file_bytes)
+    elif filename_lower.endswith('.docx'):
+        return extract_text_from_docx(file_bytes)
+    elif filename_lower.endswith('.txt'):
+        return extract_text_from_txt(file_bytes)
+    else:
+        raise ValueError(f"Unsupported file type: {filename}. Use PDF, DOCX, or TXT")
