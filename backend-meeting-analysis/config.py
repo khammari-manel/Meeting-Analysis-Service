@@ -23,7 +23,7 @@ class Config:
     REDIRECT_URI = 'http://localhost:8080/auth/google/callback'
 
     # Google Drive
-    TEAM_DRIVE_FOLDER_ID = os.getenv('TEAM_DRIVE_FOLDER_ID', '')  
+    TEAM_DRIVE_FOLDER_ID = os.getenv('TEAM_DRIVE_FOLDER_ID', '')
 
     # AI
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
