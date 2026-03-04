@@ -20,17 +20,18 @@ def google_callback():
     code = request.args.get('code')
     if not code:
         return "Error: No authorization code received", 400
-    
+
     try:
-        credentials, user_info = exchange_code_for_credentials(code)
+        credentials, user_info, credentials_dict = exchange_code_for_credentials(code)
+
         google_id = user_info.get('id')
         email = user_info.get('email')
         name = user_info.get('name')
-        
+
         print(f"Google login: {email}")
-        
+
         user = User.query.filter_by(google_id=google_id).first()
-        
+
         if not user:
             user = User(
                 google_id=google_id,
@@ -45,10 +46,13 @@ def google_callback():
             user.google_access_token = credentials.token
             user.google_refresh_token = credentials.refresh_token
             print(f"User tokens updated: {email}")
-        
+
         db.session.commit()
         login_user(user)
-        
+
+        session['google_credentials'] = credentials_dict
+        print(f"✅ Drive credentials saved to session for: {email}")
+
         return """
         <html>
             <body>
@@ -84,5 +88,6 @@ def get_current_user():
 def logout():
     email = current_user.email
     logout_user()
+    session.pop('google_credentials', None)
     print(f"User logged out: {email}")
     return jsonify({'status': 'success'})
