@@ -50,6 +50,7 @@ def google_callback():
         db.session.commit()
         login_user(user)
 
+        # save credentials in session (for Drive API)
         session['google_credentials'] = credentials_dict
         print(f"✅ Drive credentials saved to session for: {email}")
 
@@ -88,6 +89,7 @@ def get_current_user():
 def logout():
     email = current_user.email
     logout_user()
+    # delete credentials from session if you logout
     session.pop('google_credentials', None)
     print(f"User logged out: {email}")
     return jsonify({'status': 'success'})
