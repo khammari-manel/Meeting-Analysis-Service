@@ -51,8 +51,8 @@
 
         [data-theme="dark"] body::before {
             background-image:
-                linear-gradient(rgba(61,142,240,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(61,142,240,0.04) 1px, transparent 1px);
+                    linear-gradient(rgba(61,142,240,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(61,142,240,0.04) 1px, transparent 1px);
         }
 
         [data-theme="dark"] .drive-item {
@@ -242,17 +242,6 @@
         /* DRIVE BROWSER */
         .drive-browser { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
 
-        .drive-subtabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface2); }
-        .drive-subtab {
-            flex: 1; padding: 11px 16px; border: none; background: transparent;
-            color: var(--text-2); font-size: 12px; font-weight: 600;
-            font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-        }
-        .drive-subtab:hover { color: var(--text); }
-        .drive-subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
         .drive-toolbar {
             padding: 10px 14px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; gap: 10px;
@@ -325,6 +314,10 @@
         .badge-docx { background: rgba(61,142,240,0.12); color: #6aadff; border: 1px solid rgba(61,142,240,0.2); }
         .badge-txt  { background: rgba(0,214,143,0.12);  color: #00d68f; border: 1px solid rgba(0,214,143,0.2); }
         .badge-dir  { background: rgba(240,184,61,0.12); color: #f0c86a; border: 1px solid rgba(240,184,61,0.2); }
+        /* ── NEU: Audio/Video Badges ── */
+        .badge-mp3  { background: rgba(180,100,240,0.12); color: #c880ff; border: 1px solid rgba(180,100,240,0.2); }
+        .badge-wav  { background: rgba(160,90,240,0.12);  color: #b87aff; border: 1px solid rgba(160,90,240,0.2); }
+        .badge-mp4  { background: rgba(240,130,60,0.12);  color: #ff9d5c; border: 1px solid rgba(240,130,60,0.2); }
 
         .di-arrow { font-size: 12px; color: var(--text-3); opacity: 0; transition: opacity 0.15s; }
         .drive-item:hover .di-arrow { opacity: 1; }
@@ -482,7 +475,7 @@
                     <input type="file" id="file" accept=".pdf,.docx,.txt" onchange="onFileSelected(this,'doc')">
                     <span class="dz-icon">📄</span>
                     <div class="dz-title" data-i18n="upload.drop">Datei hier ablegen oder klicken</div>
-                    <div class="dz-sub"   data-i18n="upload.doc.sub">Meeting-Protokoll hochladen</div>
+                    <div class="dz-sub" data-i18n="upload.doc.sub">Meeting-Protokoll hochladen</div>
                     <div class="dz-formats">
                         <span class="fmt-badge">PDF</span>
                         <span class="fmt-badge">DOCX</span>
@@ -503,7 +496,7 @@
                 <div class="drive-browser">
                     <div class="drive-toolbar">
                         <div class="breadcrumb" id="breadcrumb">
-                            <span class="crumb active" onclick="navigateTo(null, this)">⌂ Root</span>
+                            <span class="crumb active" onclick="navigateTo(null, this)">🏢 Team Ordner</span>
                         </div>
                         <input class="drive-search" type="text" placeholder="Suchen…" id="driveSearch" oninput="filterFiles(this.value)">
                         <button class="drive-refresh" onclick="reloadDrive()" title="Aktualisieren">↻</button>
@@ -530,7 +523,7 @@
                     <input type="file" id="audioFile" accept=".mp3,.mp4,.mpeg,.mpga,.m4a,.wav,.webm" onchange="onFileSelected(this,'audio')">
                     <span class="dz-icon">🎤</span>
                     <div class="dz-title" data-i18n="upload.audio">Audio/Video hochladen</div>
-                    <div class="dz-sub"   data-i18n="upload.audio.sub">Meeting-Aufzeichnung transkribieren &amp; analysieren</div>
+                    <div class="dz-sub" data-i18n="upload.audio.sub">Meeting-Aufzeichnung transkribieren &amp; analysieren</div>
                     <div class="dz-formats">
                         <span class="fmt-badge">MP3</span><span class="fmt-badge">MP4</span>
                         <span class="fmt-badge">WAV</span><span class="fmt-badge">M4A</span>
@@ -624,32 +617,27 @@
         document.querySelectorAll('.btn-sm:not(.danger)').forEach(b => { b.textContent = lang==='de'?'🇩🇪 DE':'🇺🇸 EN'; });
     }
     function toggleLanguage() { lang = lang==='de'?'en':'de'; localStorage.setItem('appLang',lang); applyLang(); }
-    
     // ── THEME ──
+
     function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        const newTheme = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         updateThemeIcon();
     }
     function updateThemeIcon() {
         const theme = document.documentElement.getAttribute('data-theme');
-        const btn = document.querySelector('.theme-toggle');
-        if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        document.querySelectorAll('.theme-toggle').forEach(b => { b.textContent = theme==='dark'?'☀️':'🌙'; });
     }
     function loadTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        const saved = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
         updateThemeIcon();
     }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        applyLang();
-        loadTheme();
-    });
 
     // ── STATE ──
+    document.addEventListener('DOMContentLoaded', () => { applyLang(); loadTheme(); });
+
     let resultsData = null;
     let driveTab = 'team';
     let currentFolderId = null;
@@ -685,7 +673,6 @@
     }
 
     function showLogin() { document.getElementById('loginSection').classList.remove('hidden'); document.getElementById('appSection').classList.add('hidden'); }
-
     function showApp(user) {
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('appSection').classList.remove('hidden');
@@ -700,18 +687,16 @@
         document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
         document.getElementById('tab-'+tab).classList.add('active');
         document.getElementById('panel-'+tab).classList.add('active');
-        if (tab==='drive' && driveFiles.length===0) loadDriveFiles();
-        
-        // Clear previous results when switching tabs
-        resultsData = null;
-        setResult('', '');
-        hideCalendar();
+        if (tab==='drive') {
+            driveTab = 'team';
+            currentFolderId = null; breadcrumbs = [];
+            clearDriveSelection(); renderBreadcrumb(); loadDriveFiles();
+        }
+        resultsData = null; setResult('', ''); hideCalendar();
     }
 
     function switchDriveTab(tab) {
         driveTab = tab;
-        document.querySelectorAll('.drive-subtab').forEach(t=>t.classList.remove('active'));
-        document.getElementById('dtab-'+tab).classList.add('active');
         currentFolderId = null; breadcrumbs = [];
         clearDriveSelection(); renderBreadcrumb(); loadDriveFiles();
     }
@@ -719,10 +704,9 @@
     // ── LOCAL FILE ──
     function onFileSelected(input, type) {
         const file = input.files[0]; if (!file) return;
-        const chip = document.getElementById(type==='doc'?'docChip':'audioChip');
         document.getElementById(type==='doc'?'docChipName':'audioChipName').textContent = file.name;
         document.getElementById(type==='doc'?'docChipSize':'audioChipSize').textContent = (file.size/1024/1024).toFixed(1)+' MB';
-        chip.classList.add('show');
+        document.getElementById(type==='doc'?'docChip':'audioChip').classList.add('show');
     }
     function clearFile(type) {
         document.getElementById(type==='doc'?'file':'audioFile').value='';
@@ -746,6 +730,29 @@
         }
     }
 
+    // ── NEU: Audio/Video Typ-Erkennung ──
+    function getFileDisplayInfo(f) {
+        const mime = f.mimeType || '';
+        const name = (f.name||'').toLowerCase();
+        if (f.isFolder) return { icon:'📁', badge:'dir', label:'DIR' };
+        if (f.type==='pdf')  return { icon:'📄', badge:'pdf',  label:'PDF' };
+        if (f.type==='docx') return { icon:'📝', badge:'docx', label:'DOCX' };
+        if (f.type==='txt')  return { icon:'📃', badge:'txt',  label:'TXT' };
+        if (mime.includes('audio/mpeg') || name.endsWith('.mp3'))
+            return { icon:'🎵', badge:'mp3', label:'MP3' };
+        if (mime.includes('audio/mp4') || name.endsWith('.m4a'))
+            return { icon:'🎵', badge:'mp3', label:'M4A' };
+        if (mime.includes('audio/wav') || name.endsWith('.wav'))
+            return { icon:'🎵', badge:'wav', label:'WAV' };
+        if (mime.includes('audio/webm') || name.endsWith('.webm'))
+            return { icon:'🎵', badge:'wav', label:'WebM' };
+        if (mime.includes('video/mp4') || name.endsWith('.mp4'))
+            return { icon:'🎬', badge:'mp4', label:'MP4' };
+        if (mime.startsWith('audio/')) return { icon:'🎵', badge:'mp3', label:'AUDIO' };
+        if (mime.startsWith('video/')) return { icon:'🎬', badge:'mp4', label:'VIDEO' };
+        return { icon:'📃', badge:'txt', label:(f.name||'').split('.').pop().toUpperCase()||'FILE' };
+    }
+
     function renderDriveFiles(files) {
         const list = document.getElementById('driveList');
         if (!files.length) {
@@ -753,27 +760,25 @@
             return;
         }
         list.innerHTML = files.map(f => {
-            const icon  = f.isFolder?'📁':f.type==='pdf'?'📄':f.type==='docx'?'📝':'📃';
-            const badge = f.isFolder?'dir':f.type;
-            const label = f.isFolder?'DIR':f.type.toUpperCase();
-            const meta  = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString(lang) : '–';
-            const size  = f.size ? (f.size/1024/1024).toFixed(2)+' MB' : '';
-            const sel   = selectedDriveFile&&selectedDriveFile.id===f.id?'selected':'';
+            const { icon, badge, label } = getFileDisplayInfo(f);
+            const meta = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString(lang) : '–';
+            const size = f.size ? (f.size/1024/1024).toFixed(2)+' MB' : '';
+            const sel  = selectedDriveFile&&selectedDriveFile.id===f.id?'selected':'';
             return `<div class="drive-item ${sel}" onclick="onDriveItemClick('${f.id}','${escHtml(f.name)}',${f.isFolder})" data-id="${f.id}">
-      <span class="di-icon">${icon}</span>
-      <div class="di-info">
-        <div class="di-name">${escHtml(f.name)}</div>
-        <div class="di-meta">${meta}${size?' · '+size:''}</div>
-      </div>
-      <span class="di-badge badge-${badge}">${label}</span>
-      ${f.isFolder?'<span class="di-arrow">›</span>':''}
-    </div>`;
+                <span class="di-icon">${icon}</span>
+                <div class="di-info">
+                    <div class="di-name">${escHtml(f.name)}</div>
+                    <div class="di-meta">${meta}${size?' · '+size:''}</div>
+                </div>
+                <span class="di-badge badge-${badge}">${label}</span>
+                ${f.isFolder?'<span class="di-arrow">›</span>':''}
+            </div>`;
         }).join('');
     }
 
     function onDriveItemClick(id, name, isFolder) {
         if (isFolder) {
-            breadcrumbs.push({ id: currentFolderId, name: document.querySelector('.crumb.active')?.textContent||'Root' });
+            breadcrumbs.push({ id: currentFolderId, name: document.querySelector('.crumb.active')?.textContent||'Team Ordner' });
             currentFolderId = id;
             renderBreadcrumb(name); clearDriveSelection(); loadDriveFiles();
         } else { selectDriveFile(id, name); }
@@ -801,7 +806,7 @@
 
     function renderBreadcrumb(currentName) {
         const bc = document.getElementById('breadcrumb');
-        const root = driveTab==='team'?'🏢 Team':'⌂ Root';
+        const root = '🏢 Team Ordner';
         let html = `<span class="crumb ${!currentFolderId?'active':''}" onclick="navigateTo(null,this)">${root}</span>`;
         breadcrumbs.forEach(b => {
             if (b.id) html += `<span class="crumb-sep">›</span><span class="crumb" onclick="navigateTo('${b.id}',this)">${escHtml(b.name)}</span>`;
